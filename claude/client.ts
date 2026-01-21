@@ -197,13 +197,16 @@ export async function sendToClaudeCode(
 
         // Provide detailed error message
         const hasApiKey = !!Deno.env.get("ANTHROPIC_API_KEY");
-        let errorHelp = "\n\n⚠️ Both default model and Sonnet 4 encountered errors.";
+        let errorHelp = "\n\n⚠️ Both default model and Opus 4.5 encountered errors.";
         if (!hasApiKey) {
-          errorHelp +=
-            "\n\n💡 ANTHROPIC_API_KEY environment variable is not set. Please add it to your .env file.";
+          errorHelp += "\n\n💡 Not authenticated. Please either:" +
+            "\n   - Run `claude login` to use your Claude subscription (Max/Pro)" +
+            "\n   - Or set ANTHROPIC_API_KEY in your .env file for API access";
         } else {
-          errorHelp +=
-            "\n\n💡 If this persists, check that:\n- Your ANTHROPIC_API_KEY is valid\n- You have available API credits\n- Claude Code CLI is properly configured";
+          errorHelp += "\n\n💡 If this persists, check that:" +
+            "\n   - Your ANTHROPIC_API_KEY is valid" +
+            "\n   - You have available API credits" +
+            "\n   - Or try `claude login` to use your Claude subscription instead";
         }
         retryError.message += errorHelp;
         throw retryError;

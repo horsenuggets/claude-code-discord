@@ -25,6 +25,7 @@ import {
   type DiscordSender,
   enhancedClaudeCommands,
   expandableContent,
+  printAuthStatus,
 } from "./claude/index.ts";
 import {
   additionalClaudeCommands,
@@ -2167,10 +2168,12 @@ if (import.meta.main) {
       Deno.exit(1);
     }
 
-    // Warn if ANTHROPIC_API_KEY is not set
-    if (!Deno.env.get("ANTHROPIC_API_KEY")) {
-      console.warn("Warning: ANTHROPIC_API_KEY is not set. Claude Code may not work properly.");
-      console.warn("Add ANTHROPIC_API_KEY to your .env file to enable Claude Code functionality.");
+    // Check Claude authentication status (OAuth subscription or API key)
+    const authStatus = await printAuthStatus();
+    if (!authStatus.authenticated) {
+      console.warn("To authenticate:");
+      console.warn("  - Run `claude login` to use your Claude subscription (Max/Pro)");
+      console.warn("  - Or set ANTHROPIC_API_KEY in your .env file for API access");
     }
 
     // Parse command line arguments
