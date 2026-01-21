@@ -241,11 +241,6 @@ export async function createClaudeCodeBot(config: BotConfig) {
   // deno-lint-ignore no-explicit-any prefer-const
   let bot: any;
 
-  // Track the current response channel (for DM support)
-  // This is set before each command execution and used by the sender
-  // deno-lint-ignore no-explicit-any
-  let currentResponseChannel: any = null;
-
   // We'll create the Claude sender after bot initialization
   let claudeSender: ((messages: ClaudeMessage[]) => Promise<void>) | null = null;
 
@@ -1618,10 +1613,6 @@ export async function createClaudeCodeBot(config: BotConfig) {
     ],
     cleanSessionId,
     botSettings,
-    // Callback to set the current response channel (for DM support)
-    setCurrentResponseChannel: (channel) => {
-      currentResponseChannel = channel;
-    },
   };
 
   // Create Discord bot
@@ -2010,8 +2001,7 @@ export async function createClaudeCodeBot(config: BotConfig) {
   // Create Discord sender for Claude messages
   const discordSender: DiscordSender = {
     async sendMessage(content) {
-      // Use current response channel (for DM support) or fall back to server channel
-      const channel = currentResponseChannel || bot.getChannel();
+      const channel = bot.getChannel();
       if (channel) {
         const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = await import(
           "npm:discord.js@14.14.1"
@@ -2192,9 +2182,6 @@ if (import.meta.main) {
     } else {
       console.log("○ Voice transcription disabled (set OPENAI_API_KEY to enable)");
     }
-
-    // DM support is always enabled
-    console.log("✓ Direct message support enabled");
 
     // Parse command line arguments
     const args = parseArgs(Deno.args);
