@@ -1,9 +1,9 @@
 export function sanitizeChannelName(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[^a-z0-9-_]/g, '-')
-    .replace(/--+/g, '-')
-    .replace(/^-|-$/g, '')
+    .replace(/[^a-z0-9-_]/g, "-")
+    .replace(/--+/g, "-")
+    .replace(/^-|-$/g, "")
     .substring(0, 100);
 }
 

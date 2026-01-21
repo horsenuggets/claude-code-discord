@@ -1,7 +1,9 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@std/assert@1": "1.0.17",
     "jsr:@std/dotenv@0.225.3": "0.225.3",
+    "jsr:@std/internal@^1.0.12": "1.0.12",
     "npm:@anthropic-ai/claude-agent-sdk@0.2.14": "0.2.14_zod@4.3.5",
     "npm:@anthropic-ai/claude-code@^2.1.14": "2.1.14",
     "npm:@anthropic-ai/claude-code@latest": "2.1.14",
@@ -9,8 +11,17 @@
     "npm:discord.js@14.14.1": "14.14.1"
   },
   "jsr": {
+    "@std/assert@1.0.17": {
+      "integrity": "df5ebfffe77c03b3fa1401e11c762cc8f603d51021c56c4d15a8c7ab45e90dbe",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
     "@std/dotenv@0.225.3": {
       "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
+    },
+    "@std/internal@1.0.12": {
+      "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
     }
   },
   "npm": {
