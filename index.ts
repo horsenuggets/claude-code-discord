@@ -1,5 +1,7 @@
 #!/usr/bin/env -S deno run --allow-all
 
+import { load as loadEnv } from "jsr:@std/dotenv@0.225.3";
+
 import { 
   createDiscordBot, 
   type BotConfig,
@@ -1767,18 +1769,18 @@ export async function createClaudeCodeBot(config: BotConfig) {
       try {
         Deno.addSignalListener("SIGBREAK", () => handleSignal("SIGBREAK"));
       } catch (winError) {
-        console.warn('Could not register SIGBREAK handler:', winError.message);
+        console.warn('Could not register SIGBREAK handler:', winError instanceof Error ? winError.message : String(winError));
       }
     } else {
       // Unix-like systems
       try {
         Deno.addSignalListener("SIGTERM", () => handleSignal("SIGTERM"));
       } catch (unixError) {
-        console.warn('Could not register SIGTERM handler:', unixError.message);
+        console.warn('Could not register SIGTERM handler:', unixError instanceof Error ? unixError.message : String(unixError));
       }
     }
   } catch (error) {
-    console.warn('Signal handler registration error:', error.message);
+    console.warn('Signal handler registration error:', error instanceof Error ? error.message : String(error));
   }
   
   return bot;
@@ -1787,6 +1789,14 @@ export async function createClaudeCodeBot(config: BotConfig) {
 // Main execution
 if (import.meta.main) {
   try {
+    // Load environment variables from .env file
+    await loadEnv({ export: true });
+
+    // Clear Claude Code recursion detection variables
+    // (These are set when running inside Claude Code and prevent the SDK from working)
+    Deno.env.delete("CLAUDECODE");
+    Deno.env.delete("CLAUDE_CODE_ENTRYPOINT");
+
     // Get environment variables and command line arguments
     const discordToken = Deno.env.get("DISCORD_TOKEN");
     const applicationId = Deno.env.get("APPLICATION_ID");
@@ -1796,6 +1806,12 @@ if (import.meta.main) {
     if (!discordToken || !applicationId) {
       console.error("Error: DISCORD_TOKEN and APPLICATION_ID environment variables are required");
       Deno.exit(1);
+    }
+
+    // Warn if ANTHROPIC_API_KEY is not set
+    if (!Deno.env.get("ANTHROPIC_API_KEY")) {
+      console.warn("Warning: ANTHROPIC_API_KEY is not set. Claude Code may not work properly.");
+      console.warn("Add ANTHROPIC_API_KEY to your .env file to enable Claude Code functionality.");
     }
     
     // Parse command line arguments

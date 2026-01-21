@@ -87,7 +87,7 @@ async function verifyCleanup() {
       console.log(`   ✅ Proper directory structure in place`);
     }
   } catch (error) {
-    console.log(`   ❌ Error checking directory structure: ${error.message}`);
+    console.log(`   ❌ Error checking directory structure: ${error instanceof Error ? error.message : String(error)}`);
     allPassed = false;
   }
 
@@ -109,7 +109,7 @@ async function verifyCleanup() {
       console.log(`   ✅ No obsolete files in root directory`);
     }
   } catch (error) {
-    console.log(`   ⚠️  Could not check root directory: ${error.message}`);
+    console.log(`   ⚠️  Could not check root directory: ${error instanceof Error ? error.message : String(error)}`);
   }
 
   // Test 6: Verify essential functionality
@@ -128,7 +128,7 @@ async function verifyCleanup() {
       console.log(`   ✅ Unified settings properly configured`);
     }
   } catch (error) {
-    console.log(`   ❌ Error checking unified settings: ${error.message}`);
+    console.log(`   ❌ Error checking unified settings: ${error instanceof Error ? error.message : String(error)}`);
     allPassed = false;
   }
 

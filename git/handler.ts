@@ -16,9 +16,12 @@ export async function getGitInfo(workDir: string = Deno.cwd()): Promise<GitInfo>
     try {
       const { stdout: remoteUrl } = await exec("git config --get remote.origin.url", { cwd: workDir });
       if (remoteUrl) {
-        const match = remoteUrl.match(/\/([^\/]+?)(\.git)?$/);
+        const cleanUrl = remoteUrl.trim();
+        // Match repo name, handling both SSH and HTTPS URLs, with or without .git extension
+        const match = cleanUrl.match(/\/([^\/]+?)(\.git)?$/);
         if (match) {
-          repoName = match[1];
+          // Remove .git extension if present
+          repoName = match[1].replace(/\.git$/, '');
         }
       }
     } catch {

@@ -1,0 +1,97 @@
+name: Deploy release
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  deploy:
+    name: Deploy to DigitalOcean
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version and changelog
+        id: version
+        run: |
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$VERSION" >> $GITHUB_OUTPUT
+
+          # Extract changelog for this version
+          CHANGELOG=$(awk -v ver="$VERSION" '
+            /^## / {
+              if (found) exit
+              if ($2 == ver) found=1
+              next
+            }
+            found { print }
+          ' CHANGELOG.md | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | sed '/^$/N;/^\n$/d')
+
+          # Write to file for multi-line support
+          echo "$CHANGELOG" > /tmp/changelog.txt
+
+      - name: Create git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.version.outputs.tag }} || true
+          git push origin ${{ steps.version.outputs.tag }} || true
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ steps.version.outputs.tag }} \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes-file /tmp/changelog.txt || true
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.DROPLET_IP }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy to droplet
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new claude@${{ secrets.DROPLET_IP }} << 'ENDSSH'
+            set -e
+            echo "=== Deploying claude-code-discord ==="
+
+            cd ~/repos/claude-code-discord
+
+            # Pull latest changes
+            echo "Pulling latest changes..."
+            git fetch origin
+            git checkout release
+            git pull origin release
+
+            # Restart the service
+            echo "Restarting service..."
+            sudo systemctl restart claude-code-discord
+
+            # Wait and check status
+            sleep 3
+            sudo systemctl status claude-code-discord --no-pager
+
+            echo "=== Deployment complete ==="
+          ENDSSH
+
+      - name: Verify deployment
+        run: |
+          ssh -i ~/.ssh/deploy_key claude@${{ secrets.DROPLET_IP }} << 'ENDSSH'
+            # Check if service is running
+            if systemctl is-active --quiet claude-code-discord; then
+              echo "Service is running successfully"
+            else
+              echo "::error::Service failed to start"
+              sudo journalctl -u claude-code-discord --no-pager -n 50
+              exit 1
+            fi
+          ENDSSH

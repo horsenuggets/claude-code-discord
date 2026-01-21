@@ -5,15 +5,15 @@
  * This tests the core functionality of our unified settings system
  */
 
-import { 
+import {
   UNIFIED_DEFAULT_SETTINGS,
   THINKING_MODES,
   OPERATION_MODES,
   ANTHROPIC_RATE_LIMITS,
   unifiedSettingsCommands
-} from "./settings/unified-settings.ts";
+} from "../settings/unified-settings.ts";
 
-import type { UnifiedBotSettings } from "./settings/unified-settings.ts";
+import type { UnifiedBotSettings } from "../settings/unified-settings.ts";
 
 // Test 1: Verify default settings are properly structured
 function testDefaultSettings() {
@@ -113,14 +113,14 @@ function testCommandsStructure() {
   const expectedCommands = ['settings', 'todos', 'mcp'];
   
   for (const expectedCmd of expectedCommands) {
-    const found = commands.find(cmd => cmd.name === expectedCmd);
+    const found = commands.find((cmd: { name: string }) => cmd.name === expectedCmd);
     if (!found) {
       throw new Error(`Missing command: ${expectedCmd}`);
     }
   }
   
   console.log("✅ Commands structure is valid");
-  console.log(`   Commands defined: ${commands.map(cmd => cmd.name).join(', ')}`);
+  console.log(`   Commands defined: ${commands.map((cmd: { name: string }) => cmd.name).join(', ')}`);
 }
 
 // Test 6: Test settings updates functionality
@@ -158,11 +158,11 @@ function testSettingsUpdates() {
 function testCommandNameConflicts() {
   console.log("\n🧪 Testing for command name conflicts...");
   
-  const commandNames = unifiedSettingsCommands.map(cmd => cmd.name);
+  const commandNames = unifiedSettingsCommands.map((cmd: { name: string }) => cmd.name);
   const uniqueNames = new Set(commandNames);
   
   if (commandNames.length !== uniqueNames.size) {
-    const duplicates = commandNames.filter((name, index) => commandNames.indexOf(name) !== index);
+    const duplicates = commandNames.filter((name: string, index: number) => commandNames.indexOf(name) !== index);
     throw new Error(`Duplicate command names found: ${duplicates.join(', ')}`);
   }
   
@@ -197,7 +197,7 @@ async function runAllTests() {
     console.log("   ✓ No command name duplicates");
     
   } catch (error) {
-    console.error("\n❌ Test failed:", error.message);
+    console.error("\n❌ Test failed:", error instanceof Error ? error.message : String(error));
     Deno.exit(1);
   }
 }

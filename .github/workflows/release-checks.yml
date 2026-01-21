@@ -1,0 +1,155 @@
+name: Release checks
+
+on:
+  pull_request:
+    branches:
+      - release
+
+jobs:
+  pr-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title format
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          echo "Checking PR title: $TITLE"
+
+          # Must be exactly "Release X.Y.Z"
+          if [[ ! "$TITLE" =~ ^Release\ [0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::PR title must be exactly 'Release X.Y.Z' (e.g., 'Release 1.2.3')"
+            exit 1
+          fi
+
+          echo "PR title is valid."
+
+  diff-check:
+    name: Verify diff matches main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check diff with main
+        run: |
+          git fetch origin main
+
+          # Get the diff between the PR branch and main
+          DIFF=$(git diff origin/main..HEAD)
+
+          if [ -n "$DIFF" ]; then
+            echo "::error::PR branch has changes that differ from main. The release branch must contain exactly what is in main."
+            echo "Diff:"
+            echo "$DIFF"
+            exit 1
+          fi
+
+          echo "PR branch matches main exactly."
+
+  format:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Check formatting
+        run: deno fmt --check
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Run linter
+        run: deno lint
+
+  typecheck:
+    name: Type check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Type check
+        run: deno check index.ts
+
+  version:
+    name: Validate version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version update
+        run: |
+          git fetch origin release || true
+
+          # Get current version
+          CURRENT_VERSION=$(cat VERSION | tr -d '[:space:]')
+          echo "Current VERSION: $CURRENT_VERSION"
+
+          # Get previous version from release branch (if it exists)
+          if git rev-parse origin/release >/dev/null 2>&1; then
+            PREV_VERSION=$(git show origin/release:VERSION 2>/dev/null | tr -d '[:space:]' || echo "0.0.0")
+          else
+            PREV_VERSION="0.0.0"
+          fi
+          echo "Previous VERSION: $PREV_VERSION"
+
+          # Simple semver comparison (major.minor.patch)
+          IFS='.' read -ra CURR <<< "$CURRENT_VERSION"
+          IFS='.' read -ra PREV <<< "$PREV_VERSION"
+
+          CURR_NUM=$((${CURR[0]:-0} * 10000 + ${CURR[1]:-0} * 100 + ${CURR[2]:-0}))
+          PREV_NUM=$((${PREV[0]:-0} * 10000 + ${PREV[1]:-0} * 100 + ${PREV[2]:-0}))
+
+          if [ "$CURR_NUM" -le "$PREV_NUM" ]; then
+            echo "::error::VERSION ($CURRENT_VERSION) must be greater than previous ($PREV_VERSION)"
+            exit 1
+          fi
+
+          echo "Version bump is valid: $PREV_VERSION -> $CURRENT_VERSION"
+
+      - name: Check changelog entry
+        run: |
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          if ! grep -q "^## $VERSION" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md must contain an entry for version $VERSION"
+            exit 1
+          fi
+          echo "Changelog entry found for version $VERSION"
+
+      - name: Verify PR title matches VERSION
+        run: |
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          EXPECTED_TITLE="Release $VERSION"
+          ACTUAL_TITLE="${{ github.event.pull_request.title }}"
+
+          if [ "$EXPECTED_TITLE" != "$ACTUAL_TITLE" ]; then
+            echo "::error::PR title '$ACTUAL_TITLE' does not match VERSION file. Expected '$EXPECTED_TITLE'"
+            exit 1
+          fi
+
+          echo "PR title matches VERSION file."

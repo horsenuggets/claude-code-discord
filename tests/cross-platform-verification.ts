@@ -75,7 +75,7 @@ async function verifyCrossPlatformSupport() {
       console.log(`   ⚠️  System info command issue: ${sysInfo.substring(0, 100)}...`);
     }
   } catch (error) {
-    console.log(`   ❌ System info command failed: ${error.message}`);
+    console.log(`   ❌ System info command failed: ${error instanceof Error ? error.message : String(error)}`);
     allTestsPassed = false;
   }
 
@@ -90,7 +90,7 @@ async function verifyCrossPlatformSupport() {
       console.log(`   ⚠️  Process list issue: ${procList.substring(0, 100)}...`);
     }
   } catch (error) {
-    console.log(`   ❌ Process list failed: ${error.message}`);
+    console.log(`   ❌ Process list failed: ${error instanceof Error ? error.message : String(error)}`);
     allTestsPassed = false;
   }
 
@@ -114,7 +114,7 @@ async function verifyCrossPlatformSupport() {
           allTestsPassed = false;
         }
       } catch (error) {
-        console.log(`   ❌ PowerShell test error: ${error.message}`);
+        console.log(`   ❌ PowerShell test error: ${error instanceof Error ? error.message : String(error)}`);
         allTestsPassed = false;
       }
     } else {
@@ -153,7 +153,7 @@ async function verifyCrossPlatformSupport() {
     }
     console.log(`   ✅ Directory listing works (${dirEntries.length} entries found)`);
   } catch (error) {
-    console.log(`   ❌ File operations failed: ${error.message}`);
+    console.log(`   ❌ File operations failed: ${error instanceof Error ? error.message : String(error)}`);
     allTestsPassed = false;
   }
 

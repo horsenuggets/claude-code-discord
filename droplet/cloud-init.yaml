@@ -1,0 +1,108 @@
+#cloud-config
+
+# Cloud-init script for claude-code-discord droplet
+# This sets up Deno, Git, and the bot environment
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - git
+  - curl
+  - unzip
+  - jq
+
+write_files:
+  # Systemd service file for the bot
+  - path: /etc/systemd/system/claude-code-discord.service
+    content: |
+      [Unit]
+      Description=Claude Code Discord Bot
+      After=network.target
+
+      [Service]
+      Type=simple
+      User=claude
+      WorkingDirectory=/home/claude/repos/claude-code-discord
+      ExecStart=/home/claude/.deno/bin/deno run --allow-all index.ts
+      Restart=always
+      RestartSec=10
+      Environment=HOME=/home/claude
+      Environment=PATH=/home/claude/.deno/bin:/usr/local/bin:/usr/bin:/bin
+
+      [Install]
+      WantedBy=multi-user.target
+    permissions: '0644'
+
+  # Script to set up the environment
+  - path: /home/claude/setup.sh
+    content: |
+      #!/bin/bash
+      set -e
+
+      echo "=== Setting up Claude Code Discord Bot ==="
+
+      # Install Deno
+      echo "Installing Deno..."
+      curl -fsSL https://deno.land/install.sh | sh
+      export DENO_INSTALL="/home/claude/.deno"
+      export PATH="$DENO_INSTALL/bin:$PATH"
+
+      # Add Deno to PATH permanently
+      echo 'export DENO_INSTALL="/home/claude/.deno"' >> ~/.bashrc
+      echo 'export PATH="$DENO_INSTALL/bin:$PATH"' >> ~/.bashrc
+
+      # Generate SSH key for GitHub
+      echo "Generating SSH key for GitHub..."
+      ssh-keygen -t ed25519 -C "claude-code-discord-bot" -f ~/.ssh/id_ed25519 -N ""
+
+      echo ""
+      echo "=== SSH PUBLIC KEY (add this to GitHub) ==="
+      cat ~/.ssh/id_ed25519.pub
+      echo "============================================="
+      echo ""
+
+      # Configure SSH for GitHub
+      mkdir -p ~/.ssh
+      cat >> ~/.ssh/config << 'SSHCONFIG'
+      Host github.com
+          HostName github.com
+          User git
+          IdentityFile ~/.ssh/id_ed25519
+          StrictHostKeyChecking accept-new
+      SSHCONFIG
+
+      chmod 600 ~/.ssh/config
+
+      # Create repos directory
+      mkdir -p ~/repos
+
+      echo ""
+      echo "Setup complete!"
+      echo ""
+      echo "Next steps:"
+      echo "1. Add the SSH public key above to your GitHub account"
+      echo "2. Run: cd ~/repos && git clone git@github.com:YOUR_USERNAME/claude-code-discord.git"
+      echo "3. Create .env file with your tokens"
+      echo "4. Run: sudo systemctl enable claude-code-discord && sudo systemctl start claude-code-discord"
+    permissions: '0755'
+
+runcmd:
+  # Create claude user
+  - useradd -m -s /bin/bash claude
+  - chown -R claude:claude /home/claude
+
+  # Run setup as claude user
+  - su - claude -c "bash /home/claude/setup.sh"
+
+  # Enable the service (but don't start - needs config first)
+  - systemctl daemon-reload
+
+final_message: |
+  Claude Code Discord droplet is ready!
+
+  SSH in and complete setup:
+  1. Add the SSH key to GitHub
+  2. Clone your repo
+  3. Create .env file
+  4. Start the service

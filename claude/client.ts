@@ -1,4 +1,4 @@
-import { query as claudeQuery, type SDKMessage } from "npm:@anthropic-ai/claude-code@latest";
+import { query as claudeQuery, type SDKMessage } from "npm:@anthropic-ai/claude-agent-sdk@0.2.14";
 
 // Clean session ID (remove unwanted characters)
 export function cleanSessionId(sessionId: string): string {
@@ -127,18 +127,18 @@ export async function sendToClaudeCode(
   // First try with normal model
   try {
     const result = await executeWithErrorHandling(false);
-    
+
     if (result.aborted) {
       return { response: "Request was cancelled", modelUsed };
     }
-    
+
     messages.push(...result.messages);
     fullResponse = result.response;
     resultSessionId = result.sessionId;
-    
+
     // Get information from the last message
     const lastMessage = messages[messages.length - 1];
-    
+
     return {
       response: fullResponse || "No response received",
       sessionId: resultSessionId,
@@ -148,21 +148,24 @@ export async function sendToClaudeCode(
     };
   // deno-lint-ignore no-explicit-any
   } catch (error: any) {
+    console.error("Claude Code SDK error:", error.message);
+    console.error("Error stack:", error.stack);
+
     // For exit code 1 errors, retry with Sonnet 4
     if (error.message && (error.message.includes('exit code 1') || error.message.includes('exited with code 1'))) {
-      console.log("Rate limit detected, retrying with Sonnet 4...");
+      console.log("Exit code 1 detected, retrying with Sonnet 4...");
       modelUsed = "Claude Sonnet 4";
-      
+
       try {
         const retryResult = await executeWithErrorHandling(true);
-        
+
         if (retryResult.aborted) {
           return { response: "Request was cancelled", modelUsed };
         }
-        
+
         // Get information from the last message
         const lastRetryMessage = retryResult.messages[retryResult.messages.length - 1];
-        
+
         return {
           response: retryResult.response || "No response received",
           sessionId: retryResult.sessionId,
@@ -173,17 +176,25 @@ export async function sendToClaudeCode(
       // deno-lint-ignore no-explicit-any
       } catch (retryError: any) {
         // If Sonnet 4 also fails
-        if (retryError.name === 'AbortError' || 
-            controller.signal.aborted || 
+        if (retryError.name === 'AbortError' ||
+            controller.signal.aborted ||
             (retryError.message && retryError.message.includes('exited with code 143'))) {
           return { response: "Request was cancelled", modelUsed };
         }
-        
-        retryError.message += '\n\n⚠️ Both default model and Sonnet 4 encountered errors. Please wait a moment and try again.';
+
+        // Provide detailed error message
+        const hasApiKey = !!Deno.env.get("ANTHROPIC_API_KEY");
+        let errorHelp = '\n\n⚠️ Both default model and Sonnet 4 encountered errors.';
+        if (!hasApiKey) {
+          errorHelp += '\n\n💡 ANTHROPIC_API_KEY environment variable is not set. Please add it to your .env file.';
+        } else {
+          errorHelp += '\n\n💡 If this persists, check that:\n- Your ANTHROPIC_API_KEY is valid\n- You have available API credits\n- Claude Code CLI is properly configured';
+        }
+        retryError.message += errorHelp;
         throw retryError;
       }
     }
-    
+
     throw error;
   }
 }

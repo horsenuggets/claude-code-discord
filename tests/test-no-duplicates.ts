@@ -6,17 +6,17 @@
  */
 
 // Import all command arrays
-import { claudeCommands } from "./claude/command.ts";
-import { enhancedClaudeCommands } from "./claude/enhanced-commands.ts";
-import { additionalClaudeCommands } from "./claude/additional-commands.ts";
-import { advancedSettingsCommands } from "./settings/advanced-settings.ts";
-import { unifiedSettingsCommands } from "./settings/unified-settings.ts";
-import { agentCommand } from "./agent/index.ts";
-import { gitCommands } from "./git/command.ts";
-import { shellCommands } from "./shell/command.ts";
-import { utilsCommands } from "./util/command.ts";
-import { systemCommands } from "./system/commands.ts";
-import { helpCommand } from "./help/commands.ts";
+import { claudeCommands } from "../claude/command.ts";
+import { enhancedClaudeCommands } from "../claude/enhanced-commands.ts";
+import { additionalClaudeCommands } from "../claude/additional-commands.ts";
+import { advancedSettingsCommands } from "../settings/advanced-settings.ts";
+import { unifiedSettingsCommands } from "../settings/unified-settings.ts";
+import { agentCommand } from "../agent/index.ts";
+import { gitCommands } from "../git/command.ts";
+import { shellCommands } from "../shell/command.ts";
+import { utilsCommands } from "../util/command.ts";
+import { systemCommands } from "../system/commands.ts";
+import { helpCommand } from "../help/commands.ts";
 
 function testNoDuplicates() {
   console.log("🔍 Testing for duplicate command names...\n");
@@ -101,7 +101,7 @@ function printCommandsByCategory() {
 
   categories.forEach(category => {
     console.log(`\n  ${category.name} (${category.commands.length}):`);
-    category.commands.forEach(cmd => {
+    category.commands.forEach((cmd: { name: string }) => {
       console.log(`    - ${cmd.name}`);
     });
   });

@@ -6,22 +6,22 @@
  */
 
 // Import all the new systems
-import { 
+import {
   unifiedSettingsCommands,
   UNIFIED_DEFAULT_SETTINGS,
   THINKING_MODES,
-  OPERATION_MODES 
-} from "./settings/unified-settings.ts";
+  OPERATION_MODES
+} from "../settings/unified-settings.ts";
 
-import { agentCommand, PREDEFINED_AGENTS } from "./agent/index.ts";
-import { getProxyStatus } from "./util/proxy.ts";
+import { agentCommand, PREDEFINED_AGENTS } from "../agent/index.ts";
+import { getProxyStatus } from "../util/proxy.ts";
 
 // Import existing systems to check for conflicts
-import { claudeCommands } from "./claude/command.ts";
-import { enhancedClaudeCommands } from "./claude/enhanced-commands.ts";
-import { additionalClaudeCommands } from "./claude/additional-commands.ts";
-import { advancedSettingsCommands } from "./settings/advanced-settings.ts";
-import { helpCommand } from "./help/commands.ts";
+import { claudeCommands } from "../claude/command.ts";
+import { enhancedClaudeCommands } from "../claude/enhanced-commands.ts";
+import { additionalClaudeCommands } from "../claude/additional-commands.ts";
+import { advancedSettingsCommands } from "../settings/advanced-settings.ts";
+import { helpCommand } from "../help/commands.ts";
 
 async function verifyImplementation() {
   console.log("🔍 Verifying Unified Settings Implementation\n");
@@ -31,7 +31,7 @@ async function verifyImplementation() {
   
   const allCommands = [
     ...claudeCommands,
-    ...enhancedClaudeCommands.filter(cmd => cmd.name !== 'claude-templates'), // Filtered out
+    ...enhancedClaudeCommands.filter((cmd: { name: string }) => cmd.name !== 'claude-templates'), // Filtered out
     ...additionalClaudeCommands,
     ...advancedSettingsCommands,
     ...unifiedSettingsCommands,
@@ -133,7 +133,7 @@ async function verifyImplementation() {
     const proxyStatus = getProxyStatus();
     console.log(`✅ Proxy utilities working - Enabled: ${proxyStatus.enabled}`);
   } catch (error) {
-    console.error("❌ Proxy utilities error:", error.message);
+    console.error("❌ Proxy utilities error:", error instanceof Error ? error.message : String(error));
     return false;
   }
 
@@ -155,14 +155,14 @@ async function verifyImplementation() {
   console.log("\n9. 🧪 Verifying command parameters...");
   
   // Check that settings command has required options
-  const settingsCommand = unifiedSettingsCommands.find(cmd => cmd.name === 'settings');
+  const settingsCommand = unifiedSettingsCommands.find((cmd: { name: string }) => cmd.name === 'settings');
   if (!settingsCommand || !settingsCommand.options || settingsCommand.options.length === 0) {
     console.error("❌ Settings command missing options");
     return false;
   }
   
   // Check that todos command has required options
-  const todosCommand = unifiedSettingsCommands.find(cmd => cmd.name === 'todos');
+  const todosCommand = unifiedSettingsCommands.find((cmd: { name: string }) => cmd.name === 'todos');
   if (!todosCommand || !todosCommand.options || todosCommand.options.length === 0) {
     console.error("❌ Todos command missing options");
     return false;
@@ -175,7 +175,7 @@ async function verifyImplementation() {
 
 async function displaySummary() {
   console.log("\n📋 Implementation Summary:");
-  console.log("="*50);
+  console.log("=".repeat(50));
   
   console.log("\n🎯 Commands Implemented:");
   console.log("   • /settings - Unified settings management");

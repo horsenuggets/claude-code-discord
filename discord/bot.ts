@@ -1,8 +1,8 @@
-import { 
-  Client, 
-  GatewayIntentBits, 
-  Events, 
-  ChannelType, 
+import {
+  Client,
+  GatewayIntentBits,
+  Events,
+  ChannelType,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
@@ -11,7 +11,8 @@ import {
   CommandInteraction,
   ButtonInteraction,
   TextChannel,
-  EmbedBuilder
+  EmbedBuilder,
+  Message
 } from "npm:discord.js@14.14.1";
 
 import { sanitizeChannelName } from "./utils.ts";
@@ -99,8 +100,15 @@ export async function createDiscordBot(
   };
   
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds],
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+    ],
   });
+
+  // Text command prefix
+  const TEXT_COMMAND_PREFIX = "!";
   
   // Use commands from dependencies
   const commands = dependencies.commands;
@@ -211,7 +219,175 @@ export async function createDiscordBot(
       }
     };
   }
-  
+
+  // Create interaction context from a text message (for text commands)
+  function createTextCommandContext(message: Message, args: Map<string, string>): InteractionContext {
+    let replyMessage: Message | null = null;
+    let hasReplied = false;
+
+    return {
+      async deferReply(): Promise<void> {
+        // For text commands, send a "processing" message
+        replyMessage = await message.reply({
+          embeds: [{
+            color: 0xffff00,
+            description: "Processing...",
+          }]
+        });
+        hasReplied = true;
+      },
+
+      async editReply(content: MessageContent): Promise<void> {
+        const payload = convertMessageContent(content);
+        if (replyMessage) {
+          await replyMessage.edit(payload);
+        } else if (!hasReplied) {
+          replyMessage = await message.reply(payload);
+          hasReplied = true;
+        }
+      },
+
+      async followUp(content: MessageContent & { ephemeral?: boolean }): Promise<void> {
+        const payload = convertMessageContent(content);
+        await message.channel.send(payload);
+      },
+
+      async reply(content: MessageContent & { ephemeral?: boolean }): Promise<void> {
+        const payload = convertMessageContent(content);
+        if (!hasReplied) {
+          replyMessage = await message.reply(payload);
+          hasReplied = true;
+        } else {
+          await message.channel.send(payload);
+        }
+      },
+
+      async update(content: MessageContent): Promise<void> {
+        // For text commands, update acts like editReply
+        const payload = convertMessageContent(content);
+        if (replyMessage) {
+          await replyMessage.edit(payload);
+        }
+      },
+
+      getString(name: string, _required?: boolean): string | null {
+        return args.get(name) || null;
+      },
+
+      getInteger(name: string, _required?: boolean): number | null {
+        const val = args.get(name);
+        if (val) {
+          const num = parseInt(val, 10);
+          return isNaN(num) ? null : num;
+        }
+        return null;
+      },
+
+      getBoolean(name: string, _required?: boolean): boolean | null {
+        const val = args.get(name)?.toLowerCase();
+        if (val === "true" || val === "yes" || val === "1") return true;
+        if (val === "false" || val === "no" || val === "0") return false;
+        return null;
+      }
+    };
+  }
+
+  // Parse text command arguments
+  // Format: !command arg1 arg2 or !command key:value key2:value2
+  function parseTextCommandArgs(commandName: string, argsString: string): Map<string, string> {
+    const args = new Map<string, string>();
+
+    // Handle special cases for common commands
+    if (commandName === "claude" || commandName === "claude-enhanced") {
+      // Everything after the command is the prompt
+      args.set("prompt", argsString.trim());
+      return args;
+    }
+
+    if (commandName === "git" || commandName === "shell") {
+      // Everything after the command is the command to run
+      args.set("command", argsString.trim());
+      return args;
+    }
+
+    // For other commands, try to parse key:value pairs
+    const parts = argsString.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+    let positionalIndex = 0;
+    const positionalNames = ["prompt", "command", "content", "action", "value"];
+
+    for (const part of parts) {
+      if (part.includes(":") && !part.startsWith('"')) {
+        const [key, ...valueParts] = part.split(":");
+        args.set(key, valueParts.join(":").replace(/^"|"$/g, ""));
+      } else {
+        // Positional argument
+        if (positionalIndex < positionalNames.length) {
+          args.set(positionalNames[positionalIndex], part.replace(/^"|"$/g, ""));
+          positionalIndex++;
+        }
+      }
+    }
+
+    return args;
+  }
+
+  // Text command handler
+  async function handleTextCommand(message: Message) {
+    if (!myChannel || message.channelId !== myChannel.id) {
+      return;
+    }
+
+    // Ignore bot messages (but not from other bots for testing)
+    if (message.author.id === client.user?.id) {
+      return;
+    }
+
+    const content = message.content.trim();
+    if (!content.startsWith(TEXT_COMMAND_PREFIX)) {
+      return;
+    }
+
+    // Parse command and arguments
+    const withoutPrefix = content.slice(TEXT_COMMAND_PREFIX.length);
+    const spaceIndex = withoutPrefix.indexOf(" ");
+    const commandName = spaceIndex === -1 ? withoutPrefix : withoutPrefix.slice(0, spaceIndex);
+    const argsString = spaceIndex === -1 ? "" : withoutPrefix.slice(spaceIndex + 1);
+
+    console.log(`Text command received: ${commandName} from ${message.author.tag}`);
+
+    const handler = handlers.get(commandName);
+    if (!handler) {
+      await message.reply({
+        embeds: [{
+          color: 0xff0000,
+          title: "Unknown Command",
+          description: `Command \`${commandName}\` not found. Use \`!help\` for available commands.`,
+        }]
+      });
+      return;
+    }
+
+    const args = parseTextCommandArgs(commandName, argsString);
+    const ctx = createTextCommandContext(message, args);
+
+    try {
+      await handler.execute(ctx);
+    } catch (error) {
+      console.error(`Error executing text command ${commandName}:`, error);
+      try {
+        await message.reply({
+          embeds: [{
+            color: 0xff0000,
+            title: "Command Error",
+            description: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+          }]
+        });
+      } catch {
+        // Ignore errors when sending error message
+      }
+    }
+  }
+
   // Command handler - completely generic
   async function handleCommand(interaction: CommandInteraction) {
     if (!myChannel || interaction.channelId !== myChannel.id) {
@@ -439,7 +615,8 @@ export async function createDiscordBot(
             { name: 'Category', value: actualCategoryName, inline: true },
             { name: 'Repository', value: repoName, inline: true },
             { name: 'Branch', value: branchName, inline: true },
-            { name: 'Working Directory', value: `\`${workDir}\``, inline: false }
+            { name: 'Working Directory', value: `\`${workDir}\``, inline: false },
+            { name: 'Commands', value: 'Use `/command` (slash) or `!command` (text)', inline: false }
           ],
           timestamp: true
         }]
@@ -456,7 +633,12 @@ export async function createDiscordBot(
       await handleButton(interaction as ButtonInteraction);
     }
   });
-  
+
+  // Text command handler
+  client.on(Events.MessageCreate, async (message) => {
+    await handleTextCommand(message);
+  });
+
   // Login
   await client.login(discordToken);
   
