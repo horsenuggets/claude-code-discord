@@ -14,12 +14,7 @@
  */
 
 import { load as loadEnv } from "jsr:@std/dotenv@0.225.3";
-import {
-  Client,
-  GatewayIntentBits,
-  Events,
-  TextChannel,
-} from "npm:discord.js@14.14.1";
+import { Client, Events, GatewayIntentBits, TextChannel } from "npm:discord.js@14.14.1";
 
 await loadEnv({ export: true });
 
@@ -53,7 +48,7 @@ const testCases = [
 ];
 
 let currentTestIndex = 0;
-let testResults: Array<{ name: string; passed: boolean; error?: string }> = [];
+const testResults: Array<{ name: string; passed: boolean; error?: string }> = [];
 
 async function runNextTest() {
   if (currentTestIndex >= testCases.length) {
@@ -62,7 +57,7 @@ async function runNextTest() {
       const status = result.passed ? "✅ PASS" : "❌ FAIL";
       console.log(`${status}: ${result.name}${result.error ? ` (${result.error})` : ""}`);
     }
-    const passed = testResults.filter(r => r.passed).length;
+    const passed = testResults.filter((r) => r.passed).length;
     console.log(`\nTotal: ${passed}/${testResults.length} tests passed`);
 
     // Exit after tests
@@ -95,7 +90,11 @@ async function runNextTest() {
     testResults.push({ name: test.name, passed: true });
   } catch (error) {
     console.error(`  Error: ${error instanceof Error ? error.message : error}`);
-    testResults.push({ name: test.name, passed: false, error: error instanceof Error ? error.message : "Unknown error" });
+    testResults.push({
+      name: test.name,
+      passed: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 
   currentTestIndex++;
@@ -104,7 +103,7 @@ async function runNextTest() {
   setTimeout(() => runNextTest(), 5000);
 }
 
-client.once(Events.ClientReady, async () => {
+client.once(Events.ClientReady, () => {
   console.log(`Test bot logged in: ${client.user?.tag}`);
 
   // Find the target channel
@@ -113,7 +112,7 @@ client.once(Events.ClientReady, async () => {
 
     // Find the category
     const category = guild.channels.cache.find(
-      c => c.name === TARGET_CATEGORY_NAME && c.type === 4 // GuildCategory
+      (c) => c.name === TARGET_CATEGORY_NAME && c.type === 4, // GuildCategory
     );
 
     if (category) {
@@ -121,9 +120,10 @@ client.once(Events.ClientReady, async () => {
 
       // Find the channel in this category
       const channel = guild.channels.cache.find(
-        c => c.name === TARGET_CHANNEL_NAME &&
-             c.type === 0 && // GuildText
-             c.parentId === category.id
+        (c) =>
+          c.name === TARGET_CHANNEL_NAME &&
+          c.type === 0 && // GuildText
+          c.parentId === category.id,
       );
 
       if (channel) {
@@ -135,7 +135,9 @@ client.once(Events.ClientReady, async () => {
   }
 
   if (!targetChannel) {
-    console.error(`Could not find channel "${TARGET_CHANNEL_NAME}" in category "${TARGET_CATEGORY_NAME}"`);
+    console.error(
+      `Could not find channel "${TARGET_CHANNEL_NAME}" in category "${TARGET_CATEGORY_NAME}"`,
+    );
     client.destroy();
     Deno.exit(1);
   }
@@ -145,7 +147,7 @@ client.once(Events.ClientReady, async () => {
 });
 
 // Listen for responses from the main bot
-client.on(Events.MessageCreate, async (message) => {
+client.on(Events.MessageCreate, (message) => {
   // Ignore our own messages
   if (message.author.id === client.user?.id) return;
 
@@ -157,7 +159,11 @@ client.on(Events.MessageCreate, async (message) => {
     console.log(`  Response from ${message.author.username}:`);
     if (message.embeds.length > 0) {
       for (const embed of message.embeds) {
-        console.log(`    [Embed] ${embed.title || "(no title)"}: ${embed.description?.substring(0, 100) || "(no description)"}...`);
+        console.log(
+          `    [Embed] ${embed.title || "(no title)"}: ${
+            embed.description?.substring(0, 100) || "(no description)"
+          }...`,
+        );
       }
     }
     if (message.content) {

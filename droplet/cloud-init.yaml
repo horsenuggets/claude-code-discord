@@ -32,7 +32,7 @@ write_files:
 
       [Install]
       WantedBy=multi-user.target
-    permissions: '0644'
+    permissions: "0644"
 
   # Script to set up the environment
   - path: /home/claude/setup.sh
@@ -85,7 +85,7 @@ write_files:
       echo "2. Run: cd ~/repos && git clone git@github.com:YOUR_USERNAME/claude-code-discord.git"
       echo "3. Create .env file with your tokens"
       echo "4. Run: sudo systemctl enable claude-code-discord && sudo systemctl start claude-code-discord"
-    permissions: '0755'
+    permissions: "0755"
 
 runcmd:
   # Create claude user

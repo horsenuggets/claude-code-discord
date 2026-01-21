@@ -7,7 +7,7 @@ export interface ClaudeResponse {
 }
 
 export interface ClaudeMessage {
-  type: 'text' | 'tool_use' | 'tool_result' | 'thinking' | 'system' | 'other';
+  type: "text" | "tool_use" | "tool_result" | "thinking" | "system" | "other";
   content: string;
   // deno-lint-ignore no-explicit-any
   metadata?: any;
@@ -16,6 +16,6 @@ export interface ClaudeMessage {
 export interface TodoItem {
   id: string;
   content: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  priority: 'high' | 'medium' | 'low';
+  status: "pending" | "in_progress" | "completed";
+  priority: "high" | "medium" | "low";
 }

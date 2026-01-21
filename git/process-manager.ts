@@ -4,9 +4,12 @@ import { detectPlatform } from "../util/platform.ts";
 /**
  * Cross-platform process termination for git processes
  */
-function killProcessCrossPlatform(childProcess: Deno.ChildProcess, signal: "SIGTERM" | "SIGKILL" = "SIGTERM"): void {
+function killProcessCrossPlatform(
+  childProcess: Deno.ChildProcess,
+  signal: "SIGTERM" | "SIGKILL" = "SIGTERM",
+): void {
   const platform = detectPlatform();
-  
+
   try {
     if (platform === "windows") {
       // On Windows, use SIGINT or SIGKILL (SIGTERM not supported)
@@ -25,7 +28,7 @@ function killProcessCrossPlatform(childProcess: Deno.ChildProcess, signal: "SIGT
     try {
       childProcess.kill("SIGKILL");
     } catch (fallbackError) {
-      console.error('Failed to force kill git process:', fallbackError);
+      console.error("Failed to force kill git process:", fallbackError);
     }
   }
 }
@@ -53,8 +56,9 @@ export class WorktreeBotManager {
       mentionUserId: string | null;
     };
   }): Promise<void> {
-    const { fullPath, branch, actualCategoryName, discordToken, applicationId, botSettings } = config;
-    
+    const { fullPath, branch, actualCategoryName, discordToken, applicationId, botSettings } =
+      config;
+
     // Check if bot already exists for this path
     const existingBot = this.spawnedBots.get(fullPath);
     if (existingBot) {
@@ -80,7 +84,7 @@ export class WorktreeBotManager {
     });
 
     const childProcess = botProcess.spawn();
-    
+
     // Store the process info
     this.spawnedBots.set(fullPath, {
       process: childProcess,
@@ -93,7 +97,7 @@ export class WorktreeBotManager {
     // Monitor the process for completion
     this.monitorProcess(fullPath, childProcess);
 
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     console.log(`Started worktree bot process: ${fullPath}`);
   }
 
@@ -103,7 +107,11 @@ export class WorktreeBotManager {
       const status = await process.status;
       console.log(`Worktree bot for ${path} exited with code ${status.code}`);
     } catch (error) {
-      console.log(`Worktree bot for ${path} terminated: ${error instanceof Error ? error.message : String(error)}`);
+      console.log(
+        `Worktree bot for ${path} terminated: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     } finally {
       // Clean up from our tracking
       this.spawnedBots.delete(path);
@@ -132,7 +140,7 @@ export class WorktreeBotManager {
   // Kill all spawned worktree bots
   killAllWorktreeBots(): void {
     console.log(`Killing ${this.spawnedBots.size} worktree bot processes...`);
-    
+
     for (const [path, botInfo] of this.spawnedBots.entries()) {
       try {
         killProcessCrossPlatform(botInfo.process, "SIGTERM");
@@ -141,7 +149,7 @@ export class WorktreeBotManager {
         console.error(`Failed to kill worktree bot ${path}:`, error);
       }
     }
-    
+
     // Clear the tracking map
     this.spawnedBots.clear();
   }
@@ -163,7 +171,7 @@ export class WorktreeBotManager {
     }>;
   } {
     const now = new Date();
-    const bots = Array.from(this.spawnedBots.values()).map(bot => ({
+    const bots = Array.from(this.spawnedBots.values()).map((bot) => ({
       branch: bot.branch,
       workDir: bot.workDir,
       startTime: bot.startTime.toISOString(),
