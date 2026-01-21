@@ -49,10 +49,10 @@ export class ShellManager {
     this.platform = detectPlatform();
   }
 
-  // deno-lint-ignore no-explicit-any
   async execute(
     command: string,
     input?: string,
+    // deno-lint-ignore no-explicit-any
     discordContext?: any,
   ): Promise<ShellExecutionResult> {
     const processId = ++this.processIdCounter;
