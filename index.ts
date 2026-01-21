@@ -2176,6 +2176,16 @@ if (import.meta.main) {
       console.warn("  - Or set ANTHROPIC_API_KEY in your .env file for API access");
     }
 
+    // Check OpenAI API key for voice transcription
+    if (Deno.env.get("OPENAI_API_KEY")) {
+      console.log("✓ Voice transcription enabled (OpenAI Whisper)");
+    } else {
+      console.log("○ Voice transcription disabled (set OPENAI_API_KEY to enable)");
+    }
+
+    // DM support is always enabled
+    console.log("✓ Direct message support enabled");
+
     // Parse command line arguments
     const args = parseArgs(Deno.args);
     const categoryName = args.category || envCategoryName;
