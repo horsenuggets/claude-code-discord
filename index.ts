@@ -2183,9 +2183,6 @@ if (import.meta.main) {
       console.log("○ Voice transcription disabled (set OPENAI_API_KEY to enable)");
     }
 
-    // DM support is always enabled
-    console.log("✓ Direct message support enabled");
-
     // Parse command line arguments
     const args = parseArgs(Deno.args);
     const categoryName = args.category || envCategoryName;

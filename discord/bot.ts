@@ -7,12 +7,10 @@ import {
   ChannelType,
   Client,
   CommandInteraction,
-  DMChannel,
   EmbedBuilder,
   Events,
   GatewayIntentBits,
   Message,
-  Partials,
   REST,
   Routes,
   TextChannel,
@@ -114,11 +112,7 @@ export async function createDiscordBot(
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.MessageContent,
-      GatewayIntentBits.DirectMessages,
-      GatewayIntentBits.DirectMessageTyping,
     ],
-    // Required for receiving DM events
-    partials: [Partials.Channel, Partials.Message],
   });
 
   // Text command prefix
@@ -128,22 +122,9 @@ export async function createDiscordBot(
   const commands = dependencies.commands;
 
   // Helper to check if message/interaction should be processed
-  // Returns true for DMs or for messages in the bot's designated channel
-  function shouldProcessMessage(channelId: string, channel: any): boolean {
-    // Always process DMs
-    if (channel?.type === ChannelType.DM) {
-      return true;
-    }
-    // Process if it's in our designated channel
-    if (myChannel && channelId === myChannel.id) {
-      return true;
-    }
-    return false;
-  }
-
-  // Check if a channel is a DM
-  function isDMChannel(channel: any): boolean {
-    return channel?.type === ChannelType.DM;
+  // Returns true for messages in the bot's designated channel
+  function shouldProcessMessage(channelId: string): boolean {
+    return myChannel !== null && channelId === myChannel.id;
   }
 
   // Channel management
@@ -371,8 +352,8 @@ export async function createDiscordBot(
 
   // Text command handler
   async function handleTextCommand(message: Message) {
-    // Process messages from DMs or our designated channel
-    if (!shouldProcessMessage(message.channelId, message.channel)) {
+    // Only process messages in our designated channel
+    if (!shouldProcessMessage(message.channelId)) {
       return;
     }
 
@@ -396,38 +377,10 @@ export async function createDiscordBot(
     // Log voice transcription
     if (wasVoice) {
       console.log(`Voice message transcribed: "${messageContent.substring(0, 50)}..."`);
-      // Optionally notify the user that their voice was transcribed
-      if (isDMChannel(message.channel)) {
-        await message.reply({
-          content: `🎤 Voice transcribed: "${messageContent}"`,
-        });
-      }
     }
 
     const content = messageContent.trim();
     if (!content.startsWith(TEXT_COMMAND_PREFIX)) {
-      // For DMs, if no command prefix, treat the whole message as a prompt for Claude
-      if (isDMChannel(message.channel) && content) {
-        // Use the "claude" command handler directly with the content as prompt
-        const claudeHandler = handlers.get("claude");
-        if (claudeHandler) {
-          const args = new Map<string, string>();
-          args.set("prompt", content);
-          const ctx = createTextCommandContext(message, args);
-          try {
-            await claudeHandler.execute(ctx);
-          } catch (error) {
-            console.error("Error executing DM Claude prompt:", error);
-            await message.reply({
-              embeds: [{
-                color: 0xff0000,
-                title: "Error",
-                description: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-              }],
-            });
-          }
-        }
-      }
       return;
     }
 
@@ -475,8 +428,8 @@ export async function createDiscordBot(
 
   // Command handler - completely generic
   async function handleCommand(interaction: CommandInteraction) {
-    // Process commands from DMs or our designated channel
-    if (!shouldProcessMessage(interaction.channelId, interaction.channel)) {
+    // Only process commands in our designated channel
+    if (!shouldProcessMessage(interaction.channelId)) {
       return;
     }
 
@@ -519,8 +472,8 @@ export async function createDiscordBot(
 
   // Button handler - completely generic
   async function handleButton(interaction: ButtonInteraction) {
-    // Process buttons from DMs or our designated channel
-    if (!shouldProcessMessage(interaction.channelId, interaction.channel)) {
+    // Only process buttons in our designated channel
+    if (!shouldProcessMessage(interaction.channelId)) {
       return;
     }
 

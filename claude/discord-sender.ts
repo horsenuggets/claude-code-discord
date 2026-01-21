@@ -7,6 +7,25 @@ export interface DiscordSender {
   sendMessage(content: MessageContent): Promise<void>;
 }
 
+// Title separator style setting
+// "bullet" (default): "⚙️ System  •  init"
+// "colon": "⚙️ System: init"
+const titleSeparatorStyle = Deno.env.get("TITLE_SEPARATOR_STYLE") || "bullet";
+
+// Helper function to format titles with consistent separator style
+function formatTitle(emoji: string, category: string, detail?: string): string {
+  if (!detail) {
+    return `${emoji} ${category}`;
+  }
+
+  if (titleSeparatorStyle === "colon") {
+    return `${emoji} ${category}: ${detail}`;
+  }
+
+  // Default to bullet style
+  return `${emoji} ${category}  •  ${detail}`;
+}
+
 // Store full content for expand functionality
 export const expandableContent = new Map<string, string>();
 
@@ -119,7 +138,7 @@ function _formatGenericTool(
   const { preview } = truncateContent(inputStr, 10, 800);
 
   return {
-    title: `🔧 Tool Use: ${toolName}`,
+    title: formatTitle("🔧", "Tool Use", toolName),
     color: 0x0099ff,
     description: `\`\`\`json\n${preview}\n\`\`\``,
   };
@@ -217,7 +236,33 @@ export function createClaudeSender(sender: DiscordSender) {
               await sender.sendMessage({
                 embeds: [{
                   color: 0xffaa00,
-                  title: "✏️ Tool Use: Edit",
+                  title: formatTitle("✏️", "Tool Use", "Edit"),
+                  fields,
+                  timestamp: true,
+                }],
+              });
+            } else if (toolName === "Write") {
+              // Special handling for Write tool to show content properly
+              const filePath = msg.metadata.input?.file_path || "Unknown file";
+              const content = msg.metadata.input?.content || "";
+
+              const fields = [
+                { name: "📁 File Path", value: `\`${filePath}\``, inline: false },
+              ];
+
+              if (content) {
+                const { preview: contentPreview } = truncateContent(content, 8, 500);
+                fields.push({
+                  name: "📝 Content",
+                  value: `\`\`\`\n${contentPreview}\n\`\`\``,
+                  inline: false,
+                });
+              }
+
+              await sender.sendMessage({
+                embeds: [{
+                  color: 0x00ff00,
+                  title: formatTitle("📝", "Tool Use", "Write"),
                   fields,
                   timestamp: true,
                 }],
@@ -230,7 +275,7 @@ export function createClaudeSender(sender: DiscordSender) {
               const messageContent: MessageContent = {
                 embeds: [{
                   color: 0x0099ff,
-                  title: `🔧 Tool Use: ${toolName}`,
+                  title: formatTitle("🔧", "Tool Use", toolName),
                   description: `\`\`\`json\n${preview}\n\`\`\``,
                   timestamp: true,
                 }],
@@ -264,6 +309,15 @@ export function createClaudeSender(sender: DiscordSender) {
 
           // Remove system reminder blocks
           cleanContent = cleanContent.replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, "");
+
+          // Strip ANSI escape codes (colors, cursor movements, etc.)
+          // deno-lint-ignore no-control-regex
+          const ansiColorRegex = /\x1b\[[0-9;]*m/g;
+          // deno-lint-ignore no-control-regex
+          const ansiEscapeRegex = /\x1b\[[0-9;]*[a-zA-Z]/g;
+          cleanContent = cleanContent
+            .replace(ansiColorRegex, "")
+            .replace(ansiEscapeRegex, "");
 
           // Remove any remaining empty lines or extra whitespace
           cleanContent = cleanContent.replace(/\n\s*\n\s*\n/g, "\n\n").trim();
@@ -326,7 +380,7 @@ export function createClaudeSender(sender: DiscordSender) {
             color: msg.metadata?.subtype === "completion" ? 0x00ff00 : 0xaaaaaa,
             title: msg.metadata?.subtype === "completion"
               ? "✅ Claude Code Complete"
-              : `⚙️ System: ${msg.metadata?.subtype || "info"}`,
+              : formatTitle("⚙️", "System", msg.metadata?.subtype || "info"),
             timestamp: true,
             fields: [],
           };

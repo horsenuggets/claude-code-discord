@@ -20,7 +20,7 @@ jobs:
           deno-version: v2.x
 
       - name: Check formatting
-        run: deno fmt --check
+        run: deno fmt --check --ignore=e2e,logs
 
   lint:
     name: Lint
@@ -35,7 +35,7 @@ jobs:
           deno-version: v2.x
 
       - name: Run linter
-        run: deno lint
+        run: deno lint --ignore=e2e,logs
 
   typecheck:
     name: Type check
