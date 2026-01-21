@@ -10,17 +10,17 @@ export interface EmbedData {
 }
 
 export interface ComponentData {
-  type: 'button';
+  type: "button";
   customId: string;
   label: string;
-  style: 'primary' | 'secondary' | 'success' | 'danger' | 'link';
+  style: "primary" | "secondary" | "success" | "danger" | "link";
   disabled?: boolean;
 }
 
 export interface MessageContent {
   content?: string;
   embeds?: EmbedData[];
-  components?: Array<{ type: 'actionRow'; components: ComponentData[] }>;
+  components?: Array<{ type: "actionRow"; components: ComponentData[] }>;
 }
 
 export interface InteractionContext {
@@ -58,7 +58,7 @@ export type CommandHandlers = Map<string, CommandHandler>;
 // Button handler type
 export type ButtonHandler = (ctx: InteractionContext) => Promise<void> | void;
 
-// Button handler registry  
+// Button handler registry
 export type ButtonHandlers = Map<string, ButtonHandler>;
 
 // Interfaces for dependency injection

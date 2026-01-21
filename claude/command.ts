@@ -1,4 +1,4 @@
-import type { ClaudeResponse, ClaudeMessage } from "./types.ts";
+import type { ClaudeMessage, ClaudeResponse } from "./types.ts";
 import { sendToClaudeCode } from "./client.ts";
 import { convertToClaudeMessages } from "./message-converter.ts";
 import { SlashCommandBuilder } from "npm:discord.js@14.14.1";
@@ -6,28 +6,31 @@ import { SlashCommandBuilder } from "npm:discord.js@14.14.1";
 // Discord command definitions
 export const claudeCommands = [
   new SlashCommandBuilder()
-    .setName('claude')
-    .setDescription('Send message to Claude Code')
-    .addStringOption(option =>
-      option.setName('prompt')
-        .setDescription('Prompt for Claude Code')
-        .setRequired(true))
-    .addStringOption(option =>
-      option.setName('session_id')
-        .setDescription('Session ID to continue (optional)')
-        .setRequired(false)),
-  
+    .setName("claude")
+    .setDescription("Send message to Claude Code")
+    .addStringOption((option) =>
+      option.setName("prompt")
+        .setDescription("Prompt for Claude Code")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option.setName("session_id")
+        .setDescription("Session ID to continue (optional)")
+        .setRequired(false)
+    ),
+
   new SlashCommandBuilder()
-    .setName('continue')
-    .setDescription('Continue the previous Claude Code session')
-    .addStringOption(option =>
-      option.setName('prompt')
-        .setDescription('Prompt for Claude Code (optional)')
-        .setRequired(false)),
-  
+    .setName("continue")
+    .setDescription("Continue the previous Claude Code session")
+    .addStringOption((option) =>
+      option.setName("prompt")
+        .setDescription("Prompt for Claude Code (optional)")
+        .setRequired(false)
+    ),
+
   new SlashCommandBuilder()
-    .setName('claude-cancel')
-    .setDescription('Cancel currently running Claude Code command'),
+    .setName("claude-cancel")
+    .setDescription("Cancel currently running Claude Code command"),
 ];
 
 export interface ClaudeHandlerDeps {
@@ -40,7 +43,7 @@ export interface ClaudeHandlerDeps {
 
 export function createClaudeHandlers(deps: ClaudeHandlerDeps) {
   const { workDir, sendClaudeMessages } = deps;
-  
+
   return {
     // deno-lint-ignore no-explicit-any
     async onClaude(ctx: any, prompt: string, sessionId?: string): Promise<ClaudeResponse> {
@@ -48,24 +51,24 @@ export function createClaudeHandlers(deps: ClaudeHandlerDeps) {
       if (deps.claudeController) {
         deps.claudeController.abort();
       }
-      
+
       const controller = new AbortController();
       deps.setClaudeController(controller);
-      
+
       // Defer interaction (execute first)
       await ctx.deferReply();
-      
+
       // Send initial message
       await ctx.editReply({
         embeds: [{
           color: 0xffff00,
-          title: 'Claude Code Running...',
-          description: 'Waiting for response...',
-          fields: [{ name: 'Prompt', value: `\`${prompt.substring(0, 1020)}\``, inline: false }],
-          timestamp: true
-        }]
+          title: "Claude Code Running...",
+          description: "Waiting for response...",
+          fields: [{ name: "Prompt", value: `\`${prompt.substring(0, 1020)}\``, inline: false }],
+          timestamp: true,
+        }],
       });
-      
+
       const result = await sendToClaudeCode(
         workDir,
         prompt,
@@ -79,60 +82,70 @@ export function createClaudeHandlers(deps: ClaudeHandlerDeps) {
             sendClaudeMessages(claudeMessages).catch(() => {});
           }
         },
-        false // continueMode = false
+        false, // continueMode = false
       );
-      
+
       deps.setClaudeSessionId(result.sessionId);
       deps.setClaudeController(null);
-      
+
       // Send completion message with interactive buttons
       if (result.sessionId) {
         await sendClaudeMessages([{
-          type: 'system',
-          content: '',
+          type: "system",
+          content: "",
           metadata: {
-            subtype: 'completion',
+            subtype: "completion",
             session_id: result.sessionId,
-            model: result.modelUsed || 'Default',
+            model: result.modelUsed || "Default",
             total_cost_usd: result.cost,
             duration_ms: result.duration,
-            cwd: workDir
-          }
+            cwd: workDir,
+          },
         }]);
       }
-      
+
       return result;
     },
-    
+
     // deno-lint-ignore no-explicit-any
     async onContinue(ctx: any, prompt?: string): Promise<ClaudeResponse> {
       // Cancel any existing session
       if (deps.claudeController) {
         deps.claudeController.abort();
       }
-      
+
       const controller = new AbortController();
       deps.setClaudeController(controller);
-      
+
       const actualPrompt = prompt || "Please continue.";
-      
+
       // Defer interaction
       await ctx.deferReply();
-      
+
       // Send initial message
-      const embedData: { color: number; title: string; description: string; timestamp: boolean; fields?: Array<{ name: string; value: string; inline: boolean }> } = {
+      const embedData: {
+        color: number;
+        title: string;
+        description: string;
+        timestamp: boolean;
+        fields?: Array<{ name: string; value: string; inline: boolean }>;
+      } = {
         color: 0xffff00,
-        title: 'Claude Code Continuing Conversation...',
-        description: 'Loading latest conversation and waiting for response...',
-        timestamp: true
+        title: "Claude Code Continuing Conversation...",
+        description: "Loading latest conversation and waiting for response...",
+        timestamp: true,
       };
-      
+
       if (prompt) {
-        embedData.fields = [{ name: 'Prompt', value: `\`${prompt.substring(0, 1020)}\``, inline: false }];
+        embedData.fields = [{
+          name: "Prompt",
+          value: `\`${prompt.substring(0, 1020)}\``,
+          inline: false,
+        }];
       }
-      
+
       await ctx.editReply({ embeds: [embedData] });
-      
+
       const result = await sendToClaudeCode(
         workDir,
         actualPrompt,
@@ -146,43 +159,43 @@ export function createClaudeHandlers(deps: ClaudeHandlerDeps) {
             sendClaudeMessages(claudeMessages).catch(() => {});
           }
         },
-        true // continueMode = true
+        true, // continueMode = true
       );
-      
+
       deps.setClaudeSessionId(result.sessionId);
       deps.setClaudeController(null);
-      
+
       // Send completion message with interactive buttons
       if (result.sessionId) {
         await sendClaudeMessages([{
-          type: 'system',
-          content: '',
+          type: "system",
+          content: "",
           metadata: {
-            subtype: 'completion',
+            subtype: "completion",
             session_id: result.sessionId,
-            model: result.modelUsed || 'Default',
+            model: result.modelUsed || "Default",
             total_cost_usd: result.cost,
             duration_ms: result.duration,
-            cwd: workDir
-          }
+            cwd: workDir,
+          },
         }]);
       }
-      
+
       return result;
     },
-    
+
     // deno-lint-ignore no-explicit-any
     onClaudeCancel(_ctx: any): boolean {
       if (!deps.claudeController) {
         return false;
       }
-      
+
       console.log("Cancelling Claude Code session...");
       deps.claudeController.abort();
       deps.setClaudeController(null);
       deps.setClaudeSessionId(undefined);
-      
+
       return true;
-    }
+    },
   };
 }

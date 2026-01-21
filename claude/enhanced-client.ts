@@ -35,8 +35,8 @@ export class ClaudeSessionManager {
       lastActivity: new Date(),
       messageCount: 0,
       totalCost: 0,
-      model: model || 'claude-3-5-sonnet-20241022',
-      workDir
+      model: model || "claude-3-5-sonnet-20241022",
+      workDir,
     };
 
     this.sessions.set(session.id, session);
@@ -65,7 +65,7 @@ export class ClaudeSessionManager {
   getActiveSessions(maxAge: number = 3600000): ClaudeSession[] { // 1 hour default
     const cutoff = Date.now() - maxAge;
     return Array.from(this.sessions.values()).filter(
-      session => session.lastActivity.getTime() > cutoff
+      (session) => session.lastActivity.getTime() > cutoff,
     );
   }
 
@@ -76,14 +76,14 @@ export class ClaudeSessionManager {
   cleanup(maxAge: number = 24 * 3600000): number { // 24 hours default
     const cutoff = Date.now() - maxAge;
     let deleted = 0;
-    
+
     for (const [id, session] of this.sessions.entries()) {
       if (session.lastActivity.getTime() < cutoff) {
         this.sessions.delete(id);
         deleted++;
       }
     }
-    
+
     return deleted;
   }
 }
@@ -96,7 +96,7 @@ export async function enhancedClaudeQuery(
   sessionId?: string,
   onChunk?: (text: string) => void,
   onStreamJson?: (json: any) => void,
-  continueMode?: boolean
+  continueMode?: boolean,
 ) {
   let enhancedPrompt = prompt;
 
@@ -129,7 +129,7 @@ export async function enhancedClaudeQuery(
     sessionId,
     onChunk,
     onStreamJson,
-    continueMode
+    continueMode,
   );
 }
 
@@ -139,7 +139,7 @@ async function getSystemContext(workDir: string): Promise<string> {
     const [osInfo, nodeInfo, denoInfo] = await Promise.all([
       getOSInfo(),
       getNodeInfo(),
-      getDenoInfo()
+      getDenoInfo(),
     ]);
 
     return `<system-context>
@@ -152,7 +152,7 @@ Current Time: ${new Date().toISOString()}
   } catch (error) {
     return `<system-context>
 Working Directory: ${workDir}
-System Info: Unable to gather (${error instanceof Error ? error.message : 'Unknown error'})
+System Info: Unable to gather (${error instanceof Error ? error.message : "Unknown error"})
 Current Time: ${new Date().toISOString()}
 </system-context>`;
   }
@@ -162,20 +162,20 @@ Current Time: ${new Date().toISOString()}
 async function getGitContext(workDir: string): Promise<string | null> {
   try {
     const { executeGitCommand } = await import("../git/handler.ts");
-    
+
     const [status, branch, remotes, recentCommits] = await Promise.all([
       executeGitCommand(workDir, "git status --porcelain"),
       executeGitCommand(workDir, "git branch --show-current"),
       executeGitCommand(workDir, "git remote -v"),
-      executeGitCommand(workDir, "git log --oneline -5")
+      executeGitCommand(workDir, "git log --oneline -5"),
     ]);
 
     return `<git-context>
 Current Branch: ${branch.trim()}
-Status: ${status || 'Clean working directory'}
-Remotes: ${remotes || 'No remotes'}
+Status: ${status || "Clean working directory"}
+Remotes: ${remotes || "No remotes"}
 Recent Commits:
-${recentCommits || 'No commits'}
+${recentCommits || "No commits"}
 </git-context>`;
   } catch (error) {
     return null;
@@ -190,22 +190,22 @@ async function getFileContext(filePaths: string[]): Promise<string | null> {
     for (const filePath of filePaths) {
       try {
         const content = await Deno.readTextFile(filePath);
-        const truncatedContent = content.length > 2000 
-          ? content.substring(0, 2000) + '\n... (truncated)'
+        const truncatedContent = content.length > 2000
+          ? content.substring(0, 2000) + "\n... (truncated)"
           : content;
-        
+
         fileContents.push(`<file path="${filePath}">
 ${truncatedContent}
 </file>`);
       } catch (error) {
         fileContents.push(`<file path="${filePath}">
-Error reading file: ${error instanceof Error ? error.message : 'Unknown error'}
+Error reading file: ${error instanceof Error ? error.message : "Unknown error"}
 </file>`);
       }
     }
 
     return `<file-context>
-${fileContents.join('\n')}
+${fileContents.join("\n")}
 </file-context>`;
   } catch (error) {
     return null;
@@ -219,7 +219,7 @@ function getOSInfo(): string {
     const arch = Deno.build.arch;
     return `OS: ${os} (${arch})`;
   } catch {
-    return 'OS: Unknown';
+    return "OS: Unknown";
   }
 }
 
@@ -228,14 +228,14 @@ async function getNodeInfo(): Promise<string> {
     const process = new Deno.Command("node", {
       args: ["--version"],
       stdout: "piped",
-      stderr: "piped"
+      stderr: "piped",
     });
-    
+
     const { stdout } = await process.output();
     const version = new TextDecoder().decode(stdout).trim();
     return `Node.js: ${version}`;
   } catch {
-    return 'Node.js: Not available';
+    return "Node.js: Not available";
   }
 }
 
@@ -243,48 +243,48 @@ function getDenoInfo(): string {
   try {
     return `Deno: ${Deno.version.deno}`;
   } catch {
-    return 'Deno: Unknown version';
+    return "Deno: Unknown version";
   }
 }
 
 // Claude Code model options - Updated with latest models
 export const CLAUDE_MODELS = {
-  'claude-sonnet-4': {
-    name: 'Claude Sonnet 4 (Latest)',
-    description: 'Most advanced Claude model with superior reasoning',
-    contextWindow: 200000,
-    recommended: true,
-    supportsThinking: true
-  },
-  'claude-sonnet-4-20250514?thinking_mode=true': {
-    name: 'Claude Sonnet 4 (Thinking Mode)',
-    description: 'Claude Sonnet 4 with visible reasoning process',
+  "claude-sonnet-4": {
+    name: "Claude Sonnet 4 (Latest)",
+    description: "Most advanced Claude model with superior reasoning",
     contextWindow: 200000,
     recommended: true,
     supportsThinking: true,
-    thinkingMode: true
   },
-  'claude-3-5-sonnet-20241022': {
-    name: 'Claude 3.5 Sonnet',
-    description: 'Previous generation high-performance model',
+  "claude-sonnet-4-20250514?thinking_mode=true": {
+    name: "Claude Sonnet 4 (Thinking Mode)",
+    description: "Claude Sonnet 4 with visible reasoning process",
+    contextWindow: 200000,
+    recommended: true,
+    supportsThinking: true,
+    thinkingMode: true,
+  },
+  "claude-3-5-sonnet-20241022": {
+    name: "Claude 3.5 Sonnet",
+    description: "Previous generation high-performance model",
     contextWindow: 200000,
     recommended: false,
-    supportsThinking: false
+    supportsThinking: false,
   },
-  'claude-3-5-haiku-20241022': {
-    name: 'Claude 3.5 Haiku',
-    description: 'Fast model for quick tasks and simple queries',
+  "claude-3-5-haiku-20241022": {
+    name: "Claude 3.5 Haiku",
+    description: "Fast model for quick tasks and simple queries",
     contextWindow: 200000,
     recommended: false,
-    supportsThinking: false
+    supportsThinking: false,
   },
-  'claude-3-opus-20240229': {
-    name: 'Claude 3 Opus',
-    description: 'Legacy model for complex reasoning (deprecated)',
+  "claude-3-opus-20240229": {
+    name: "Claude 3 Opus",
+    description: "Legacy model for complex reasoning (deprecated)",
     contextWindow: 200000,
     recommended: false,
-    supportsThinking: false
-  }
+    supportsThinking: false,
+  },
 };
 
 // Quick prompt templates for common tasks
@@ -296,5 +296,5 @@ export const CLAUDE_TEMPLATES = {
   refactor: "Please refactor this code to improve maintainability and follow best practices:",
   document: "Please add comprehensive documentation to this code including JSDoc comments:",
   security: "Please review this code for security vulnerabilities and suggest fixes:",
-  convert: "Please convert this code to TypeScript with proper types and interfaces:"
+  convert: "Please convert this code to TypeScript with proper types and interfaces:",
 };

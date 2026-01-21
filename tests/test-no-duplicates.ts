@@ -39,7 +39,7 @@ function testNoDuplicates() {
   console.log(`📊 Total commands to register: ${allCommands.length}`);
 
   // Extract command names
-  const commandNames = allCommands.map(cmd => cmd.name);
+  const commandNames = allCommands.map((cmd) => cmd.name);
   console.log("\n📋 All command names:");
   commandNames.sort().forEach((name, index) => {
     console.log(`  ${index + 1}. ${name}`);
@@ -47,7 +47,7 @@ function testNoDuplicates() {
 
   // Check for duplicates
   const nameCounts = new Map<string, number>();
-  commandNames.forEach(name => {
+  commandNames.forEach((name) => {
     nameCounts.set(name, (nameCounts.get(name) || 0) + 1);
   });
 
@@ -65,11 +65,11 @@ function testNoDuplicates() {
   console.log(`\n✅ No duplicates found! ${uniqueNames.size} unique commands`);
 
   // Additional verification - check specific problematic commands
-  const problematicCommands = ['settings', 'claude-templates'];
+  const problematicCommands = ["settings", "claude-templates"];
   console.log("\n🔍 Checking specific commands that were problematic:");
-  
-  problematicCommands.forEach(cmdName => {
-    const count = commandNames.filter(name => name === cmdName).length;
+
+  problematicCommands.forEach((cmdName) => {
+    const count = commandNames.filter((name) => name === cmdName).length;
     if (count === 0) {
       console.log(`  ✅ "${cmdName}" - Not found (expected if removed)`);
     } else if (count === 1) {
@@ -84,7 +84,7 @@ function testNoDuplicates() {
 
 function printCommandsByCategory() {
   console.log("\n📚 Commands by category:");
-  
+
   const categories = [
     { name: "Claude Core", commands: claudeCommands },
     { name: "Claude Enhanced", commands: enhancedClaudeCommands },
@@ -96,10 +96,10 @@ function printCommandsByCategory() {
     { name: "Shell", commands: shellCommands },
     { name: "Utils", commands: utilsCommands },
     { name: "System", commands: systemCommands },
-    { name: "Help", commands: [helpCommand] }
+    { name: "Help", commands: [helpCommand] },
   ];
 
-  categories.forEach(category => {
+  categories.forEach((category) => {
     console.log(`\n  ${category.name} (${category.commands.length}):`);
     category.commands.forEach((cmd: { name: string }) => {
       console.log(`    - ${cmd.name}`);
@@ -111,7 +111,7 @@ function printCommandsByCategory() {
 if (import.meta.main) {
   const success = testNoDuplicates();
   printCommandsByCategory();
-  
+
   if (success) {
     console.log("\n🎉 All tests passed! Commands should register successfully.");
   } else {
