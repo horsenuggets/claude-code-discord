@@ -48,11 +48,11 @@ export async function sendToClaudeCode(
           verbose: true,
           ...(continueMode && { continue: true }),
           ...(cleanedSessionId && !continueMode && { resume: cleanedSessionId }),
-          ...(useRetryModel && { model: "claude-sonnet-4-20250514" }),
+          ...(useRetryModel && { model: "claude-opus-4-5-20251101" }),
         },
       };
 
-      console.log(`Claude Code: Running with ${useRetryModel ? "Sonnet 4" : "default model"}...`);
+      console.log(`Claude Code: Running with ${useRetryModel ? "Opus 4.5" : "default model"}...`);
       if (continueMode) {
         console.log(`Continue mode: Reading latest conversation in directory`);
       } else if (cleanedSessionId) {

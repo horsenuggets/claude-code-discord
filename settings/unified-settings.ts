@@ -53,7 +53,7 @@ export const UNIFIED_DEFAULT_SETTINGS: UnifiedBotSettings = {
   mentionUserId: null,
 
   // Claude settings
-  defaultModel: "claude-sonnet-4",
+  defaultModel: "claude-opus-4-5-20251101",
   defaultTemperature: 0.7,
   defaultMaxTokens: 4096,
   defaultSystemPrompt: null,
