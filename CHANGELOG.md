@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2
+
+- Removed DM support to simplify bot architecture
+- Added configurable title separator style via TITLE_SEPARATOR_STYLE env var
+- Added e2e test utilities for Discord automation
+- Excluded e2e and logs directories from CI lint and format checks
+
 ## 0.1.1
 
 - Added DM support - bot now responds to direct messages
