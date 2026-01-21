@@ -14,6 +14,8 @@
     "click": "tsx src/click.ts",
     "inspect": "tsx src/inspect.ts",
     "scroll": "tsx src/scroll.ts",
+    "create-server": "tsx src/create-server.ts",
+    "create-bot": "tsx src/create-bot.ts",
     "test": "tsx src/run-tests.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
