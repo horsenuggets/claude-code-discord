@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Browser data (generated during testing)
+chrome-user-data/
+
+# Screenshots (generated during testing)
+screenshots/
+
+# Build output
+dist/
+
+# Environment files
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,47 @@
+{
+  "name": "claude-code-discord-e2e",
+  "version": "1.0.0",
+  "description": "End-to-end tests for claude-code-discord bot using Puppeteer",
+  "type": "module",
+  "scripts": {
+    "launch": "tsx src/launch-browser.ts",
+    "login": "tsx src/login.ts",
+    "send": "tsx src/send-message.ts",
+    "read": "tsx src/read-messages.ts",
+    "screenshot": "tsx src/screenshot.ts",
+    "nav": "tsx src/navigate.ts",
+    "goto": "tsx src/goto-channel.ts",
+    "click": "tsx src/click.ts",
+    "inspect": "tsx src/inspect.ts",
+    "scroll": "tsx src/scroll.ts",
+    "create-server": "tsx src/create-server.ts",
+    "create-bot": "tsx src/create-bot.ts",
+    "test": "tsx src/run-tests.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "format": "prettier --write \"**/*.{ts,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,json}\""
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "puppeteer": "^24.35.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^25.0.9",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.53.1"
+  },
+  "prettier": {
+    "tabWidth": 4,
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "es5",
+    "printWidth": 100
+  }
+}
