@@ -29,7 +29,7 @@
     "discord.js": "npm:discord.js@14.14.1",
     "@anthropic-ai/claude-code": "npm:@anthropic-ai/claude-code@latest"
   },
-  "permissions": {
-    "allow-all": true
+  "test": {
+    "include": ["tests/"]
   }
 }
