@@ -43,7 +43,7 @@ export const DEFAULT_SETTINGS: AdvancedBotSettings = {
   mentionUserId: null,
 
   // Claude Code
-  defaultModel: "claude-sonnet-4",
+  defaultModel: "claude-opus-4-5-20251101",
   defaultTemperature: 0.7,
   defaultMaxTokens: 4096,
   defaultSystemPrompt: null,

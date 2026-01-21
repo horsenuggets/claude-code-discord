@@ -29,7 +29,7 @@ export const PREDEFINED_AGENTS: Record<string, AgentConfig> = {
   "code-reviewer": {
     name: "Code Reviewer",
     description: "Specialized in code review and quality analysis",
-    model: "claude-sonnet-4",
+    model: "claude-opus-4-5-20251101",
     systemPrompt:
       "You are an expert code reviewer. Focus on code quality, security, performance, and best practices. Provide detailed feedback with specific suggestions for improvement.",
     temperature: 0.3,
@@ -40,7 +40,7 @@ export const PREDEFINED_AGENTS: Record<string, AgentConfig> = {
   "architect": {
     name: "Software Architect",
     description: "Focused on system design and architecture decisions",
-    model: "claude-sonnet-4",
+    model: "claude-opus-4-5-20251101",
     systemPrompt:
       "You are a senior software architect. Help design scalable, maintainable systems. Focus on architectural patterns, design principles, and technology choices.",
     temperature: 0.5,
@@ -51,7 +51,7 @@ export const PREDEFINED_AGENTS: Record<string, AgentConfig> = {
   "debugger": {
     name: "Debug Specialist",
     description: "Expert at finding and fixing bugs",
-    model: "claude-sonnet-4",
+    model: "claude-opus-4-5-20251101",
     systemPrompt:
       "You are a debugging expert. Help identify root causes of issues, suggest debugging strategies, and provide step-by-step solutions.",
     temperature: 0.2,
@@ -62,7 +62,7 @@ export const PREDEFINED_AGENTS: Record<string, AgentConfig> = {
   "security-expert": {
     name: "Security Analyst",
     description: "Specialized in security analysis and vulnerability assessment",
-    model: "claude-sonnet-4",
+    model: "claude-opus-4-5-20251101",
     systemPrompt:
       "You are a cybersecurity expert. Focus on identifying security vulnerabilities, suggesting secure coding practices, and analyzing potential threats.",
     temperature: 0.1,
@@ -73,7 +73,7 @@ export const PREDEFINED_AGENTS: Record<string, AgentConfig> = {
   "performance-optimizer": {
     name: "Performance Engineer",
     description: "Expert in performance optimization and profiling",
-    model: "claude-sonnet-4",
+    model: "claude-opus-4-5-20251101",
     systemPrompt:
       "You are a performance optimization expert. Help identify bottlenecks, suggest optimizations, and improve system performance.",
     temperature: 0.3,
@@ -84,7 +84,7 @@ export const PREDEFINED_AGENTS: Record<string, AgentConfig> = {
   "devops-engineer": {
     name: "DevOps Engineer",
     description: "Specialized in deployment, CI/CD, and infrastructure",
-    model: "claude-sonnet-4",
+    model: "claude-opus-4-5-20251101",
     systemPrompt:
       "You are a DevOps engineer. Help with deployment strategies, CI/CD pipelines, infrastructure as code, and operational best practices.",
     temperature: 0.4,
@@ -95,7 +95,7 @@ export const PREDEFINED_AGENTS: Record<string, AgentConfig> = {
   "general-assistant": {
     name: "General Development Assistant",
     description: "General-purpose development assistant",
-    model: "claude-sonnet-4",
+    model: "claude-opus-4-5-20251101",
     systemPrompt:
       "You are a helpful development assistant. Provide clear, accurate, and practical help with programming tasks, answer questions, and offer suggestions.",
     temperature: 0.7,

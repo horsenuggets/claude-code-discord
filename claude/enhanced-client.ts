@@ -35,7 +35,7 @@ export class ClaudeSessionManager {
       lastActivity: new Date(),
       messageCount: 0,
       totalCost: 0,
-      model: model || "claude-3-5-sonnet-20241022",
+      model: model || "claude-opus-4-5-20251101",
       workDir,
     };
 
@@ -249,18 +249,25 @@ function getDenoInfo(): string {
 
 // Claude Code model options - Updated with latest models
 export const CLAUDE_MODELS = {
-  "claude-sonnet-4": {
-    name: "Claude Sonnet 4 (Latest)",
-    description: "Most advanced Claude model with superior reasoning",
+  "claude-opus-4-5-20251101": {
+    name: "Claude Opus 4.5",
+    description: "Most advanced Claude model with superior reasoning and creativity",
     contextWindow: 200000,
     recommended: true,
+    supportsThinking: true,
+  },
+  "claude-sonnet-4-20250514": {
+    name: "Claude Sonnet 4",
+    description: "High-performance model balancing speed and capability",
+    contextWindow: 200000,
+    recommended: false,
     supportsThinking: true,
   },
   "claude-sonnet-4-20250514?thinking_mode=true": {
     name: "Claude Sonnet 4 (Thinking Mode)",
     description: "Claude Sonnet 4 with visible reasoning process",
     contextWindow: 200000,
-    recommended: true,
+    recommended: false,
     supportsThinking: true,
     thinkingMode: true,
   },
@@ -274,13 +281,6 @@ export const CLAUDE_MODELS = {
   "claude-3-5-haiku-20241022": {
     name: "Claude 3.5 Haiku",
     description: "Fast model for quick tasks and simple queries",
-    contextWindow: 200000,
-    recommended: false,
-    supportsThinking: false,
-  },
-  "claude-3-opus-20240229": {
-    name: "Claude 3 Opus",
-    description: "Legacy model for complex reasoning (deprecated)",
     contextWindow: 200000,
     recommended: false,
     supportsThinking: false,

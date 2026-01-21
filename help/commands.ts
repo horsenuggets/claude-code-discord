@@ -317,7 +317,7 @@ export const COMMAND_HELP = {
     usage: "/claude-enhanced prompt: [message] model: [model] template: [template] ...",
     examples: [
       "/claude-enhanced prompt: Debug this error include_system_info: true",
-      "/claude-enhanced prompt: Optimize this code template: optimize model: claude-3-5-sonnet-20241022",
+      "/claude-enhanced prompt: Optimize this code template: optimize model: claude-opus-4-5-20251101",
       "/claude-enhanced prompt: Help with this file context_files: src/main.ts,README.md include_git_context: true",
     ],
     parameters: [
@@ -812,7 +812,7 @@ export const COMMAND_HELP = {
       "/claude-settings action: [show/set-model/set-temperature/toggle-auto-system-info/etc] value: [optional]",
     examples: [
       "/claude-settings action: show",
-      "/claude-settings action: set-model value: claude-sonnet-4",
+      "/claude-settings action: set-model value: claude-opus-4-5-20251101",
       "/claude-settings action: set-temperature value: 0.8",
       "/claude-settings action: toggle-auto-git-context",
     ],
@@ -851,9 +851,9 @@ export const COMMAND_HELP = {
     description: "Quickly switch Claude model for your next conversation",
     usage: "/quick-model model: [model-id]",
     examples: [
-      "/quick-model model: claude-sonnet-4",
+      "/quick-model model: claude-opus-4-5-20251101",
+      "/quick-model model: claude-sonnet-4-20250514",
       "/quick-model model: claude-sonnet-4-20250514?thinking_mode=true",
-      "/quick-model model: claude-3-5-sonnet-20241022",
     ],
     parameters: [
       { name: "model", description: "Claude model to use", required: true },
