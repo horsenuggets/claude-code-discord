@@ -222,6 +222,32 @@ export function createClaudeSender(sender: DiscordSender) {
                   timestamp: true,
                 }],
               });
+            } else if (toolName === "Write") {
+              // Special handling for Write tool to show content properly
+              const filePath = msg.metadata.input?.file_path || "Unknown file";
+              const content = msg.metadata.input?.content || "";
+
+              const fields = [
+                { name: "📁 File Path", value: `\`${filePath}\``, inline: false },
+              ];
+
+              if (content) {
+                const { preview: contentPreview } = truncateContent(content, 8, 500);
+                fields.push({
+                  name: "📝 Content",
+                  value: `\`\`\`\n${contentPreview}\n\`\`\``,
+                  inline: false,
+                });
+              }
+
+              await sender.sendMessage({
+                embeds: [{
+                  color: 0x00ff00,
+                  title: "📝 Tool Use: Write",
+                  fields,
+                  timestamp: true,
+                }],
+              });
             } else {
               // All other tools use generic consistent formatting
               const inputStr = JSON.stringify(msg.metadata.input || {}, null, 2);
@@ -264,6 +290,15 @@ export function createClaudeSender(sender: DiscordSender) {
 
           // Remove system reminder blocks
           cleanContent = cleanContent.replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, "");
+
+          // Strip ANSI escape codes (colors, cursor movements, etc.)
+          // deno-lint-ignore no-control-regex
+          const ansiColorRegex = /\x1b\[[0-9;]*m/g;
+          // deno-lint-ignore no-control-regex
+          const ansiEscapeRegex = /\x1b\[[0-9;]*[a-zA-Z]/g;
+          cleanContent = cleanContent
+            .replace(ansiColorRegex, "")
+            .replace(ansiEscapeRegex, "");
 
           // Remove any remaining empty lines or extra whitespace
           cleanContent = cleanContent.replace(/\n\s*\n\s*\n/g, "\n\n").trim();

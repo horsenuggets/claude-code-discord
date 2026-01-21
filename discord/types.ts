@@ -79,4 +79,7 @@ export interface BotDependencies {
     mentionEnabled: boolean;
     mentionUserId: string | null;
   };
+  // Callback to set the current response channel (for DM support)
+  // deno-lint-ignore no-explicit-any
+  setCurrentResponseChannel?: (channel: any) => void;
 }

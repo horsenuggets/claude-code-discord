@@ -381,6 +381,11 @@ export async function createDiscordBot(
       return;
     }
 
+    // Set current response channel for DM support
+    if (dependencies.setCurrentResponseChannel) {
+      dependencies.setCurrentResponseChannel(message.channel);
+    }
+
     // Get message content (with voice transcription support)
     const attachments = message.attachments.map((a) => ({
       url: a.url,
@@ -478,6 +483,11 @@ export async function createDiscordBot(
     // Process commands from DMs or our designated channel
     if (!shouldProcessMessage(interaction.channelId, interaction.channel)) {
       return;
+    }
+
+    // Set current response channel for DM support
+    if (dependencies.setCurrentResponseChannel) {
+      dependencies.setCurrentResponseChannel(interaction.channel);
     }
 
     const ctx = createInteractionContext(interaction);
