@@ -23,7 +23,7 @@ import { additionalClaudeCommands } from "../claude/additional-commands.ts";
 import { advancedSettingsCommands } from "../settings/advanced-settings.ts";
 import { helpCommand } from "../help/commands.ts";
 
-async function verifyImplementation() {
+function verifyImplementation() {
   console.log("🔍 Verifying Unified Settings Implementation\n");
 
   // Test 1: Verify no command name conflicts
@@ -173,7 +173,7 @@ async function verifyImplementation() {
   return true;
 }
 
-async function displaySummary() {
+function displaySummary() {
   console.log("\n📋 Implementation Summary:");
   console.log("=".repeat(50));
   

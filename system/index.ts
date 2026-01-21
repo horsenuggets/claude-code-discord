@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-unused-vars
 import { 
   detectPlatform, 
   getPlatformCommands, 
@@ -169,7 +170,7 @@ ${systemInfoOutput}`;
       }
     },
 
-    async onEnvVars(ctx: any, filter?: string) {
+    onEnvVars(ctx: any, filter?: string) {
       try {
         const envVars = Deno.env.toObject();
         let envInfo = `Environment Variables - ${getPlatformDisplayName()}\n\n`;

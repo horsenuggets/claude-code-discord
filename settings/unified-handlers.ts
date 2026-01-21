@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-unused-vars no-case-declarations
 import type { UnifiedBotSettings, RateLimitTier } from "./unified-settings.ts";
 import { 
   UNIFIED_DEFAULT_SETTINGS, 
@@ -36,8 +37,8 @@ export interface MCPServerConfig {
 }
 
 // In-memory stores (in production, these would be persisted)
-let todos: TodoItem[] = [];
-let mcpServers: MCPServerConfig[] = [];
+const todos: TodoItem[] = [];
+const mcpServers: MCPServerConfig[] = [];
 
 export function createUnifiedSettingsHandlers(deps: UnifiedSettingsHandlerDeps) {
   const { settings, updateSettings, crashHandler } = deps;

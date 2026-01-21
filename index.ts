@@ -33,7 +33,7 @@ import { systemCommands, createSystemHandlers } from "./system/index.ts";
 import { helpCommand, createHelpHandlers } from "./help/index.ts";
 import { agentCommand, createAgentHandlers } from "./agent/index.ts";
 import { ProcessCrashHandler, setupGlobalErrorHandlers, ProcessHealthMonitor } from "./process/index.ts";
-import { handlePaginationInteraction, cleanupPaginationStates, formatShellOutput, formatGitOutput, formatError, createFormattedEmbed } from "./discord/index.ts";
+import { cleanupPaginationStates, formatShellOutput, formatGitOutput, formatError, createFormattedEmbed } from "./discord/index.ts";
 
 
 
@@ -80,7 +80,6 @@ export async function createClaudeCodeBot(config: BotConfig) {
   
   // Claude Code session management
   let claudeController: AbortController | null = null;
-  // deno-lint-ignore no-unused-vars
   let claudeSessionId: string | undefined;
   
   // Message history for navigation (like terminal history)
@@ -162,7 +161,7 @@ export async function createClaudeCodeBot(config: BotConfig) {
   }, 3600000); // Clean up every hour
   
   // Setup crash notification
-  crashHandler.setNotificationCallback(async (report) => {
+  crashHandler.setNotificationCallback((report) => {
     // Notification will be sent through Discord when bot is ready
     console.warn(`Process crash: ${report.processType} ${report.processId || ''} - ${report.error.message}`);
   });

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-case-declarations
 import { CLAUDE_MODELS } from "../claude/enhanced-client.ts";
 import type { AdvancedBotSettings } from "./advanced-settings.ts";
 

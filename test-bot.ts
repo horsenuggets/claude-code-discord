@@ -53,7 +53,7 @@ const testCases = [
 ];
 
 let currentTestIndex = 0;
-let testResults: Array<{ name: string; passed: boolean; error?: string }> = [];
+const testResults: Array<{ name: string; passed: boolean; error?: string }> = [];
 
 async function runNextTest() {
   if (currentTestIndex >= testCases.length) {
@@ -104,7 +104,7 @@ async function runNextTest() {
   setTimeout(() => runNextTest(), 5000);
 }
 
-client.once(Events.ClientReady, async () => {
+client.once(Events.ClientReady, () => {
   console.log(`Test bot logged in: ${client.user?.tag}`);
 
   // Find the target channel
@@ -145,7 +145,7 @@ client.once(Events.ClientReady, async () => {
 });
 
 // Listen for responses from the main bot
-client.on(Events.MessageCreate, async (message) => {
+client.on(Events.MessageCreate, (message) => {
   // Ignore our own messages
   if (message.author.id === client.user?.id) return;
 

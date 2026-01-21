@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 // Enhanced process crash handling and recovery
 import type { ShellManager } from "../shell/handler.ts";
 import type { WorktreeBotManager } from "../git/process-manager.ts";
@@ -187,15 +188,10 @@ export class ProcessCrashHandler {
   }
 
   // Recover Claude process
-  private async recoverClaudeProcess(report: CrashReport): Promise<boolean> {
-    try {
-      // Claude processes are typically session-based and self-recovering
-      console.log('Claude process crash noted, session will be reset on next request');
-      return true;
-    } catch (error) {
-      console.error('Failed to recover Claude process:', error);
-      return false;
-    }
+  private recoverClaudeProcess(_report: CrashReport): boolean {
+    // Claude processes are typically session-based and self-recovering
+    console.log('Claude process crash noted, session will be reset on next request');
+    return true;
   }
 
   // Get crash statistics

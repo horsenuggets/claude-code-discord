@@ -136,7 +136,7 @@ async function verifyCrossPlatformSupport() {
 
   // Test 7: Cross-Platform Path Handling
   console.log("\n7. 🧪 Testing path handling...");
-  const testPath = "/home/user/test";
+  const _testPath = "/home/user/test";
   // Note: normalizePath function would be tested here if it were exported
   console.log("   ✅ Path handling functions available");
 
@@ -197,7 +197,7 @@ async function verifyCrossPlatformSupport() {
 }
 
 // Test specific Discord bot command compatibility
-async function testDiscordBotCompatibility() {
+function testDiscordBotCompatibility() {
   console.log("\n" + "=".repeat(60));
   console.log("🤖 Discord Bot Command Compatibility Test\n");
 

@@ -1,5 +1,5 @@
+// deno-lint-ignore-file no-explicit-any
 import { SlashCommandBuilder } from "npm:discord.js@14.14.1";
-import { CLAUDE_MODELS, CLAUDE_TEMPLATES } from "./enhanced-client.ts";
 
 export const additionalClaudeCommands = [
   new SlashCommandBuilder()
@@ -184,14 +184,14 @@ export interface AdditionalClaudeHandlerDeps {
   workDir: string;
   claudeController: AbortController | null;
   setClaudeController: (controller: AbortController | null) => void;
-  sendClaudeMessages: (messages: any[]) => Promise<void>;
-  sessionManager: any;
-  crashHandler: any;
-  settings: any;
+  sendClaudeMessages: (messages: unknown[]) => Promise<void>;
+  sessionManager: unknown;
+  crashHandler: unknown;
+  settings: unknown;
 }
 
 export function createAdditionalClaudeHandlers(deps: AdditionalClaudeHandlerDeps) {
-  const { workDir, sessionManager, crashHandler, sendClaudeMessages, settings } = deps;
+  const { workDir, sessionManager: _sessionManager, crashHandler, sendClaudeMessages, settings } = deps;
 
   return {
     async onClaudeExplain(

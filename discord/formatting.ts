@@ -148,11 +148,15 @@ export function formatShellOutput(
   };
 
   // Clean up common shell output issues
+  // deno-lint-ignore no-control-regex
+  const ansiColorRegex = /\x1b\[[0-9;]*m/g;
+  // deno-lint-ignore no-control-regex
+  const ansiEscapeRegex = /\x1b\[[0-9;]*[a-zA-Z]/g;
   let cleanOutput = output
     .replace(/\r\n/g, '\n') // Normalize line endings
     .replace(/\r/g, '\n') // Handle remaining carriage returns
-    .replace(/\x1b\[[0-9;]*m/g, '') // Remove ANSI color codes
-    .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '') // Remove other ANSI escape sequences
+    .replace(ansiColorRegex, '') // Remove ANSI color codes
+    .replace(ansiEscapeRegex, '') // Remove other ANSI escape sequences
     .trim();
 
   // Add command context if it's not too long

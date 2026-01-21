@@ -204,7 +204,6 @@ export function getShellCommand(): string[] {
  * Format file size in platform-appropriate units
  */
 export function formatFileSize(bytes: number): string {
-  const platform = detectPlatform();
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   let size = bytes;
   let unitIndex = 0;

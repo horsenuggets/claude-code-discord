@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-unused-vars
 // Agent command implementation
 import { SlashCommandBuilder } from "npm:discord.js@14.14.1";
 
@@ -145,8 +146,8 @@ export interface AgentHandlerDeps {
 }
 
 // In-memory storage for agent sessions (in production, would be persisted)
-let agentSessions: AgentSession[] = [];
-let currentUserAgent: Record<string, string> = {}; // userId -> agentName
+const agentSessions: AgentSession[] = [];
+const currentUserAgent: Record<string, string> = {}; // userId -> agentName
 
 export function createAgentHandlers(deps: AgentHandlerDeps) {
   const { workDir, crashHandler, sendClaudeMessages, sessionManager } = deps;

@@ -127,7 +127,7 @@ function testCommandsStructure() {
 function testSettingsUpdates() {
   console.log("\n🧪 Testing settings update functionality...");
   
-  let testSettings: UnifiedBotSettings = { ...UNIFIED_DEFAULT_SETTINGS };
+  const testSettings: UnifiedBotSettings = { ...UNIFIED_DEFAULT_SETTINGS };
   
   // Test thinking mode update
   testSettings.thinkingMode = 'think-hard';
@@ -171,7 +171,7 @@ function testCommandNameConflicts() {
 }
 
 // Run all tests
-async function runAllTests() {
+function runAllTests() {
   console.log("🚀 Running Unified Settings Tests\n");
   
   try {

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-unused-vars
 import { SlashCommandBuilder } from "npm:discord.js@14.14.1";
 
 export const systemCommands = [
@@ -358,43 +359,39 @@ async function getDiskUsage(): Promise<string> {
   }
 }
 
-async function getEnvironmentVariables(filter?: string): Promise<string> {
-  try {
-    const env = Deno.env.toObject();
-    let envEntries = Object.entries(env);
-    
-    if (filter) {
-      envEntries = envEntries.filter(([key]) => 
-        key.toLowerCase().includes(filter.toLowerCase())
-      );
-    }
-    
-    if (envEntries.length === 0) {
-      return filter ? `**No environment variables found matching "${filter}"**` : "**No environment variables found**";
-    }
-    
-    // Sort by key name and limit output
-    envEntries.sort(([a], [b]) => a.localeCompare(b));
-    
-    // Mask sensitive values
-    const maskedEntries = envEntries.map(([key, value]) => {
-      const sensitivePatterns = [
-        /password/i, /token/i, /key/i, /secret/i, /auth/i, /api/i
-      ];
-      
-      const isSensitive = sensitivePatterns.some(pattern => pattern.test(key));
-      const displayValue = isSensitive ? '***MASKED***' : value;
-      
-      return `${key}=${displayValue}`;
-    });
-    
-    const output = maskedEntries.join('\n');
-    const title = filter ? `**Environment Variables (filtered by "${filter}"):**` : '**Environment Variables:**';
-    
-    return `${title}\n\`\`\`\n${output}\n\`\`\``;
-  } catch (error) {
-    throw new Error(`Failed to get environment variables: ${error instanceof Error ? error.message : 'Unknown error'}`);
+function getEnvironmentVariables(filter?: string): string {
+  const env = Deno.env.toObject();
+  let envEntries = Object.entries(env);
+
+  if (filter) {
+    envEntries = envEntries.filter(([key]) =>
+      key.toLowerCase().includes(filter.toLowerCase())
+    );
   }
+
+  if (envEntries.length === 0) {
+    return filter ? `**No environment variables found matching "${filter}"**` : "**No environment variables found**";
+  }
+
+  // Sort by key name and limit output
+  envEntries.sort(([a], [b]) => a.localeCompare(b));
+
+  // Mask sensitive values
+  const maskedEntries = envEntries.map(([key, value]) => {
+    const sensitivePatterns = [
+      /password/i, /token/i, /key/i, /secret/i, /auth/i, /api/i
+    ];
+
+    const isSensitive = sensitivePatterns.some(pattern => pattern.test(key));
+    const displayValue = isSensitive ? '***MASKED***' : value;
+
+    return `${key}=${displayValue}`;
+  });
+
+  const output = maskedEntries.join('\n');
+  const title = filter ? `**Environment Variables (filtered by "${filter}"):**` : '**Environment Variables:**';
+
+  return `${title}\n\`\`\`\n${output}\n\`\`\``;
 }
 
 async function getSystemLogs(lines: number = 50, service?: string): Promise<string> {

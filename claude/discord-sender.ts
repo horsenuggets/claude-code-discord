@@ -82,7 +82,7 @@ function truncateContent(content: string, maxLines = 15, maxChars = 1000): { pre
 }
 
 // Helper function to detect file type from path
-function getFileTypeInfo(filePath: string): { icon: string; language: string } {
+function _getFileTypeInfo(filePath: string): { icon: string; language: string } {
   const ext = filePath.split('.').pop()?.toLowerCase() || '';
   
   const fileTypes: Record<string, { icon: string; language: string }> = {
@@ -107,9 +107,9 @@ function getFileTypeInfo(filePath: string): { icon: string; language: string } {
 }
 
 // Tool-specific formatters
-function formatGenericTool(toolName: string, metadata: any): { title: string; color: number; description: string } {
+function _formatGenericTool(toolName: string, metadata: Record<string, unknown>): { title: string; color: number; description: string } {
   const inputStr = JSON.stringify(metadata.input || {}, null, 2);
-  const { preview, isTruncated } = truncateContent(inputStr, 10, 800);
+  const { preview } = truncateContent(inputStr, 10, 800);
   
   return {
     title: `🔧 Tool Use: ${toolName}`,
@@ -176,14 +176,12 @@ export function createClaudeSender(sender: DiscordSender) {
         } else {
           // Use simplified consistent formatting for all tools
           const toolName = msg.metadata?.name || 'Unknown';
-          let embedData;
-          
+
           // Special handling for Edit tool to keep "Replacing/With" functionality
           if (toolName === 'Edit') {
             const filePath = msg.metadata.input?.file_path || 'Unknown file';
             const oldString = msg.metadata.input?.old_string || '';
             const newString = msg.metadata.input?.new_string || '';
-            const fileInfo = getFileTypeInfo(filePath);
             
             const fields = [
               { name: '📁 File Path', value: `\`${filePath}\``, inline: false }

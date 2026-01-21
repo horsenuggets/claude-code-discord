@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-unused-vars
 import { sendToClaudeCode } from "./client.ts";
 import type { ClaudeMessage } from "./types.ts";
 
@@ -212,7 +213,7 @@ ${fileContents.join('\n')}
 }
 
 // System information helpers
-async function getOSInfo(): Promise<string> {
+function getOSInfo(): string {
   try {
     const os = Deno.build.os;
     const arch = Deno.build.arch;
@@ -238,7 +239,7 @@ async function getNodeInfo(): Promise<string> {
   }
 }
 
-async function getDenoInfo(): Promise<string> {
+function getDenoInfo(): string {
   try {
     return `Deno: ${Deno.version.deno}`;
   } catch {
