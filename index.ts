@@ -196,6 +196,7 @@ export async function createClaudeCodeBot(config: BotConfig) {
     console.warn(
       `Process crash: ${report.processType} ${report.processId || ""} - ${report.error.message}`,
     );
+    return Promise.resolve();
   });
 
   // Initialize unified bot settings (new system)
@@ -330,7 +331,7 @@ export async function createClaudeCodeBot(config: BotConfig) {
     },
     sessionManager: claudeSessionManager,
     crashHandler,
-    settings: advancedSettings,
+    settings: unifiedSettings,
   });
 
   const advancedSettingsHandlers = createAdvancedSettingsHandlers({

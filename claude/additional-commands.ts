@@ -1,5 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
 import { SlashCommandBuilder } from "npm:discord.js@14.14.1";
+import type { UnifiedBotSettings } from "../settings/unified-settings.ts";
+import type { ProcessCrashHandler } from "../process/crash-handler.ts";
+import type { ClaudeSessionManager } from "./enhanced-client.ts";
+import type { ClaudeMessage } from "./types.ts";
 
 export const additionalClaudeCommands = [
   new SlashCommandBuilder()
@@ -208,10 +212,10 @@ export interface AdditionalClaudeHandlerDeps {
   workDir: string;
   claudeController: AbortController | null;
   setClaudeController: (controller: AbortController | null) => void;
-  sendClaudeMessages: (messages: unknown[]) => Promise<void>;
-  sessionManager: unknown;
-  crashHandler: unknown;
-  settings: unknown;
+  sendClaudeMessages: (messages: ClaudeMessage[]) => Promise<void>;
+  sessionManager: ClaudeSessionManager;
+  crashHandler: ProcessCrashHandler;
+  settings: UnifiedBotSettings;
 }
 
 export function createAdditionalClaudeHandlers(deps: AdditionalClaudeHandlerDeps) {

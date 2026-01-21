@@ -38,6 +38,7 @@ export async function sendToClaudeCode(
   // Wrap with comprehensive error handling
   const executeWithErrorHandling = async (useRetryModel = false) => {
     try {
+      // Note: outputFormat removed as SDK doesn't support "stream-json" in type definition
       const queryOptions = {
         prompt,
         abortController: controller,
@@ -45,7 +46,6 @@ export async function sendToClaudeCode(
           cwd: workDir,
           permissionMode: "bypassPermissions" as const,
           verbose: true,
-          outputFormat: "stream-json",
           ...(continueMode && { continue: true }),
           ...(cleanedSessionId && !continueMode && { resume: cleanedSessionId }),
           ...(useRetryModel && { model: "claude-sonnet-4-20250514" }),
