@@ -82,3 +82,8 @@ agenthub/agents/youtube/db
 
 # Mobile development
 android-sdk/ logs/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
